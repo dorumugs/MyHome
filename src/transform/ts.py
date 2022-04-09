@@ -386,9 +386,9 @@ class Transform(object):
             '총지수': 'float'
         })
 
-        price_t['분기'] = price_t.날짜.apply(lambda x: (int(str(x).split(' ')[1]) - 1) // 3 + 1)
-        price_t['년'] = price_t.날짜.apply(lambda x: str(x).split(' ')[0])
-        price_t['월'] = price_t.날짜.apply(lambda x: str(x).split(' ')[1])
+        price_t['분기'] = price_t.날짜.apply(lambda x: (int(str(x).split('.')[1]) - 1) // 3 + 1)
+        price_t['년'] = price_t.날짜.apply(lambda x: str(x).split('.')[0])
+        price_t['월'] = price_t.날짜.apply(lambda x: str(x).split('.')[1])
 
         left = pd.DataFrame(price_t.groupby(['년', '분기'])['총지수'].mean()).reset_index()
         right = pd.DataFrame(price_t.groupby(['년'])['총지수'].mean()).reset_index()
