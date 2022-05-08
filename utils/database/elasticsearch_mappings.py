@@ -188,8 +188,8 @@ UNSOLD_MAPPING = {
     },
 }
 
-REAL_ESTATE_MAPPING_AC_PRE = {
-    'info': {'index_nm': 'real_estate_actual_tx_pre'},
+REAL_ESTATE_MAPPING_AC_MASTER = {
+    'info': {'index_nm': 'real_estate_actual_master'},
     'mapping': {
         "mappings": {
             "properties": {
@@ -312,8 +312,8 @@ REAL_ESTATE_MAPPING_AC_PRE = {
     },
 }
 
-REAL_ESTATE_MAPPING_AC = {
-    'info': {'index_nm': 'real_estate_actual_tx'},
+REAL_ESTATE_MAPPING_AC_DETAIL = {
+    'info': {'index_nm': 'real_estate_actual_tx_detail'},
     'mapping': {
         "mappings": {
             "properties": {
@@ -490,8 +490,8 @@ REAL_ESTATE_MAPPING_AC = {
     },
 }
 
-REAL_ESTATE_MAPPING_CH_PRE = {
-    'info': {'index_nm': 'real_estate_chartered_rent_tx_pre'},
+REAL_ESTATE_MAPPING_CH_MASTER = {
+    'info': {'index_nm': 'real_estate_chartered_rent_master'},
     'mapping': {
         "mappings": {
             "properties": {
@@ -620,8 +620,8 @@ REAL_ESTATE_MAPPING_CH_PRE = {
     },
 }
 
-REAL_ESTATE_MAPPING_CH = {
-    'info': {'index_nm': 'real_estate_chartered_rent_tx'},
+REAL_ESTATE_MAPPING_CH_DETAIL = {
+    'info': {'index_nm': 'real_estate_chartered_rent_detail'},
     'mapping': {
         "mappings": {
             "properties": {

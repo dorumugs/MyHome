@@ -1,66 +1,37 @@
+from src.core.core_extract import CoreExtract
+from utils.database.database_config import DatabaseConfig
 from utils.log import logger
-from config.setting import *
-from config.population import *
-from config.prices import *
-from config.unsold import *
+from config.project_env.directory_config import *
+from config.molit_go_kr.actual_tx_and_chartered_rent import *
+from config.kosis_kr.population import *
+from config.kosis_kr.prices import *
+from config.kosis_kr.unsold import *
+from config.index_go_kr.gdp import *
+from config.juso_go_kr.region_code import *
+from config.code_go_kr.reg_region_code import *
 import pandas as pd
+import numpy as np
 import requests
-import bs4
-import os
 import json
 import calendar
+from bs4 import BeautifulSoup
 
 
-class Extract(object):
-
-    def __init__(self, _logger):
+class ExtendsExtract(CoreExtract):
+    def __init__(self, _logger=None, extends_sqlalchemy=None):
         if _logger is None:
-            self.logger = logger.setup("EXTRACT")
+            self.logger = logger.setup_logger("[Extract]")
         else:
             self.logger = _logger
+        super().__init__(extends_sqlalchemy)
+        self.database_config = DatabaseConfig()
 
     @staticmethod
-    def read_code_file(file_name):
-        csv = pd.read_csv('./data/csv/code.csv', delimiter="\t")
+    def read_code_file():
+        csv = pd.read_csv(CSV_DIRECTORY + "code.csv", sep=',', encoding='utf-8')
         csv["code"] = csv.법정동코드.apply(lambda x: str(x)[0:5])
         codes = list(set(csv.code.to_list()))
         return codes
-
-    @staticmethod
-    def df_for_date(rows):
-        row_list = []
-        name_list = []
-        column_list = []
-        rows_len = len(rows)
-        for i in range(0, rows_len):
-            columns = rows[i].find_all()
-
-            columns_len = len(columns)
-            for j in range(0, columns_len):
-                if i == 0:
-                    name_list.append(columns[j].name)
-                eachColumn = columns[j].text
-                column_list.append(eachColumn)
-            row_list.append(column_list)
-            column_list = []
-
-        df = pd.DataFrame(row_list, columns=name_list)
-        return df
-
-    def request_api(self, tx_columns, url, service_key, codes, date):
-        df = pd.DataFrame(columns=tx_columns)
-        for code in codes:
-            payload = "serviceKey=" + service_key + "&" \
-                      + "LAWD_CD=" + code + "&" \
-                      + "DEAL_YMD=" + date
-            res = requests.get(url + payload).text
-            xmlobj = bs4.BeautifulSoup(res, 'lxml-xml')
-            rows = xmlobj.findAll('item')
-            each_df = self.df_for_date(rows)
-            if each_df.shape[0] != 0:
-                each_df = each_df[tx_columns]
-                df = pd.concat([df, each_df], axis=0)
-        return df
 
     @staticmethod
     def create_date_range(selected_month):
@@ -86,13 +57,13 @@ class Extract(object):
                 each_df = each_df[ACTUAL_TX_COLUMNS]
                 df = pd.concat([df, each_df], axis=0)
                 self.logger.info(f"{date} actual_tx")
-                df.to_parquet("./data/output/actual_tx/"+"df_" + str(date) + ".gzip", compression="gzip")
+                df.to_parquet(ACTUAL_TX_DIRECTORY + "df_" + str(date) + ".gzip", compression="gzip")
             elif df_type == "chartered_rent":
                 each_df = self.request_api(CHARTERED_RENT_TX_COLUMNS, url, service_key, codes, date)
                 each_df = each_df[CHARTERED_RENT_TX_COLUMNS]
                 df = pd.concat([df, each_df], axis=0)
                 self.logger.info(f"{date} chartered_rent")
-                df.to_parquet("./data/output/chartered_rent/" + "df_" + str(date) + ".gzip", compression="gzip")
+                df.to_parquet(CHARTERED_RENT_DIRECTORY + "df_" + str(date) + ".gzip", compression="gzip")
         return df
 
     @staticmethod
@@ -102,41 +73,49 @@ class Extract(object):
         res_file = text['file']
         if get_type == 'UNSOLD':
             UNSOLD_DOWN_URL = unsold_url(res_file)
-            response = requests.get(UNSOLD_DOWN_URL, headers=UNSOLD_DOWN_HEADERS, cookies=UNSOLD_DOWN_COOKIES, data=UNSOLD_DOWN_DATA)
+            response = requests.get(UNSOLD_DOWN_URL, headers=UNSOLD_DOWN_HEADERS, cookies=UNSOLD_DOWN_COOKIES,
+                                    data=create_unsold_download_data())
         elif get_type == 'PRICE':
-            PRICES_DOWN_DATA=make_prices_down_data(res_file)
-            response = requests.get(PRICE_DOWN_URL, headers=PRICES_HEADERS, cookies=PRICES_COOKIES, data=PRICES_DOWN_DATA)
+            response = requests.get(PRICE_DOWN_URL, headers=PRICES_HEADERS, cookies=PRICES_COOKIES,
+                                    data=create_price_download_data(res_file))
         elif get_type == 'POPULATION':
-            POPULATION_DOWN_DATA=make_population_down_data(res_file)
-            response = requests.get(POPULATION_DOWN_URL, headers=POPULATION_DOWN_HEADER, cookies=POPULATION_DOWN_COOKIES, data=POPULATION_DOWN_DATA)
+            POPULATION_DOWN_DATA = make_population_down_data(res_file)
+            response = requests.get(POPULATION_DOWN_URL, headers=POPULATION_DOWN_HEADER,
+                                    cookies=POPULATION_DOWN_COOKIES, data=POPULATION_DOWN_DATA)
 
         with open(csv, 'wb') as fd:
             for chunk in response.iter_content(chunk_size=1024):
                 fd.write(chunk)
-        # f = pd.read_csv("./data/csv/UNSOLD.csv", encoding='cp949')
 
     def get_data_by_curl(self, get_type):
         if get_type == 'GDP':
             response = requests.post(GDP_URL, headers=GDP_HEADERS, cookies=GDP_COOKIES, data=GDP_DATA)
-            os.makedirs("./data/xls/", exist_ok=True)
-            with open("./data/xls/GDP.xls", 'wb') as fd:
+            soup = BeautifulSoup(response.content, 'html.parser')
+            tbl = soup.find("table", {"id": "t_Table_273601"})
+            df = pd.read_html(str(tbl))[0].reset_index(drop=True).dropna()
+            df = df.reset_index(drop=True).T
+            df.rename(columns=df.iloc[0], inplace=True)
+            df = df.drop(df.index[0]).reset_index().rename(columns={
+                'index': '년분기', '국내총생산(명목GDP)': 'Nominal_GDP', '경제성장률(실질GDP성장률)': 'Real_GDP'
+            })
+            df.to_csv(CSV_DIRECTORY + "GDP.csv", sep='|', na_rep='NaN', index=False)
+        elif get_type == 'REG_REGION_CODE':
+            response = requests.post(CODE_URL, headers=CODE_HEADERS, cookies=CODE_COOKIES, data=CODE_DATA)
+            with open(CSV_DIRECTORY + "code.zip", 'wb') as fd:
                 for chunk in response.iter_content(chunk_size=1024):
                     fd.write(chunk)
-            df = pd.read_excel("./data/xls/GDP.xls", index_col=0)
-            df.T.to_csv("./data/csv/GDP.csv", sep='|', na_rep='NaN', index=False)
         elif get_type == 'REGION_CODE_FULL':
             response = requests.get(REGION_CODE_FULL_URL, headers=REGION_FULL_HEADERS, cookies=REGION_FULL_COOKIES)
-            with open("./data/csv/REGION_CODE_FULL.zip", 'wb') as fd:
+            with open(REGION_CODE_DIRECTORY + "REGION_CODE_FULL.zip", 'wb') as fd:
                 for chunk in response.iter_content(chunk_size=1024):
                     fd.write(chunk)
         elif get_type == 'POPULATION':
-            csv = "./data/csv/population.csv"
+            csv = CSV_DIRECTORY + "population.csv"
             self.get_kosis_data(get_type, csv, POPULATION_URL, POPULATION_HEADERS, POPULATION_COOKIES, POPULATION_DATA)
         elif get_type == 'UNSOLD':
-            csv = "./data/csv/UNSOLD.csv"
-            self.get_kosis_data(get_type, csv, UNSOLD_URL, UNSOLD_HEADERS, UNSOLD_COOKIES, UNSOLD_DATA)
+            csv = CSV_DIRECTORY + "UNSOLD.csv"
+            self.get_kosis_data(get_type, csv, UNSOLD_URL, UNSOLD_HEADERS, UNSOLD_COOKIES, create_unsold_data())
         elif get_type == 'PRICE':
-            csv = "./data/csv/PRICE.csv"
-            self.get_kosis_data(get_type, csv, PRICES_URL, PRICES_HEADERS, PRICES_COOKIES, PRICES_DATA)
-
+            csv = CSV_DIRECTORY + "PRICE.csv"
+            self.get_kosis_data(get_type, csv, PRICES_URL, PRICES_HEADERS, PRICES_COOKIES, create_price_data())
 

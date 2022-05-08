@@ -1,21 +1,21 @@
 from utils.log import logger
 from elasticsearch import Elasticsearch
 import json
-from datetime import date, timedelta
+from datetime import date
 from elasticsearch import helpers
-from config.elasticsearch.mappings_elasticsearch import *
-from config.elasticsearch.fields_elasticsearch import *
+from utils.database.elasticsearch_mappings import *
+from utils.database.elasticsearch_fields import *
+from utils.database.database_config import DatabaseConfig
 
 
 class QelasticSearch(object):
-    def __init__(self, _logger):
+    def __init__(self, _logger=None):
         if _logger is None:
-            self.logger = logger.setup("EXPORT")
+            self.logger = logger.setup_logger("ELASTIC")
         else:
             self.logger = _logger
-
-        with open('./config/elasticsearch/elastic_config', "r", encoding="UTF-8") as f:
-            conf = json.loads(f.read())
+        self.database_config = DatabaseConfig()
+        conf = json.loads(str(self.database_config.ELASTICSEARCH_CONN).replace("'", '"'))
         hosts = conf["hosts"]
         self.es = Elasticsearch(hosts=hosts)
 
@@ -73,22 +73,22 @@ class QelasticSearch(object):
         today = date.today()
         date_str = today.strftime("%Y.%m.%d")
         index_nm, mapping = '', ''
-        if target == 'ACTUAL':
-            index_nm = REAL_ESTATE_MAPPING_AC['info']['index_nm']+'='+date_str
+        if target == 'ACTUAL_DETAIL':
+            index_nm = REAL_ESTATE_MAPPING_AC_DETAIL['info']['index_nm'] + '=' + date_str
             self.logger.info(f"Index Name - {index_nm}")
-            mapping = REAL_ESTATE_MAPPING_AC['mapping']
-        elif target == 'CHARTERED_RENT':
-            index_nm = REAL_ESTATE_MAPPING_CH['info']['index_nm'] + '=' + date_str
+            mapping = REAL_ESTATE_MAPPING_AC_DETAIL['mapping']
+        elif target == 'CHARTERED_RENT_DETAIL':
+            index_nm = REAL_ESTATE_MAPPING_CH_DETAIL['info']['index_nm'] + '=' + date_str
             self.logger.info(f"Index Name - {index_nm}")
-            mapping = REAL_ESTATE_MAPPING_CH['mapping']
-        elif target == 'ACTUAL_PRE':
-            index_nm = REAL_ESTATE_MAPPING_AC_PRE['info']['index_nm']+'='+date_str
+            mapping = REAL_ESTATE_MAPPING_CH_DETAIL['mapping']
+        elif target == 'ACTUAL_MASTER':
+            index_nm = REAL_ESTATE_MAPPING_AC_MASTER['info']['index_nm'] + '=' + date_str
             self.logger.info(f"Index Name - {index_nm}")
-            mapping = REAL_ESTATE_MAPPING_AC_PRE['mapping']
-        elif target == 'CHARTERED_RENT_PRE':
-            index_nm = REAL_ESTATE_MAPPING_CH_PRE['info']['index_nm'] + '=' + date_str
+            mapping = REAL_ESTATE_MAPPING_AC_MASTER['mapping']
+        elif target == 'CHARTERED_RENT_MASTER':
+            index_nm = REAL_ESTATE_MAPPING_CH_MASTER['info']['index_nm'] + '=' + date_str
             self.logger.info(f"Index Name - {index_nm}")
-            mapping = REAL_ESTATE_MAPPING_CH_PRE['mapping']
+            mapping = REAL_ESTATE_MAPPING_CH_MASTER['mapping']
         elif target == 'AC_CH':
             index_nm = AC_CH_MAPPING['info']['index_nm'] + '=' + date_str
             self.logger.info(f"Index Name - {index_nm}")

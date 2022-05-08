@@ -1,0 +1,343 @@
+# 소비자 물가 지수
+import pandas as pd
+from datetime import date
+
+PRICES_URL = 'https://kosis.kr/statHtml/downGrid.do'
+PRICES_COOKIES = {
+    'newKOSIS2020StatisCtgrSettingCookie_2': 'A%7CB%7CC%7CD%7CE%7CF%7CG%7CH1%7CH2%7CI1%7CI2%7CJ1%7CJ2%7CK1%7CK2%7CL%7CM1%7CM2%7CN1%7CN2%7CO%7CP1%7CP2%7CQ%7CR%7CS1%7CS2%7CT%7CU%7CV',
+    'mb': 'N',
+    'pastQueryArr': '%uC18C%uBE44%uC790%uBB3C%uAC00%uC9C0%uC218',
+    'PCID': '16513851736995578911351',
+    'KOSISMyViewStatisCookie': '101%7CDT_1J20003%7C%uC18C%uBE44%uC790%uBB3C%uAC00%uC9C0%uC218%282020%3D100%29%u2502101%7CDT_1IN1502%7C%uC778%uAD6C%2C%20%uAC00%uAD6C%20%uBC0F%20%uC8FC%uD0DD%20-%20%uC74D%uBA74%uB3D9%282015%2C2020%29%2C%20%uC2DC%uAD70%uAD6C%282016%7E2019%29%u2502101%7CDT_1J20041%7C%uC5F0%uB3C4%uBCC4%20%uC18C%uBE44%uC790%uBB3C%uAC00%20%uB4F1%uB77D%uB960%u2502',
+    'JSESSIONID': 'h9gU5JUCuxt9bdoAI0wYC1Aryihu0DFcwcihum71Dd8BvC7H7RuWRofFQUlWHKi2.STAT_WAS1_servlet_engine5',
+    'clientid': '040029824177',
+}
+PRICES_HEADERS = {
+    'Accept': 'application/json, text/javascript, */*; q=0.01',
+    'Accept-Encoding': 'gzip, deflate, br',
+    'Accept-Language': 'ko,en-US;q=0.9,en;q=0.8,ko-KR;q=0.7',
+    'Connection': 'keep-alive',
+    'Content-Length': '8445',
+    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+    'Host': 'kosis.kr',
+    'Origin': 'https://kosis.kr',
+    'Referer': 'https://kosis.kr/statHtml/statHtmlContent.do',
+    'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="100", "Google Chrome";v="100"',
+    'sec-ch-ua-mobile': '?0',
+    'sec-ch-ua-platform': '"macOS"',
+    'Sec-Fetch-Dest': 'empty',
+    'Sec-Fetch-Mode': 'cors',
+    'Sec-Fetch-Site': 'same-origin',
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36',
+    'X-Requested-With': 'XMLHttpRequest',
+}
+
+# 지출목적별 소비자물가지수
+PRICE_DOWN_URL = 'https://kosis.kr/statHtml/downNormal.do'
+PRICES_DOWN_COOKIES = {
+    'newKOSIS2020StatisCtgrSettingCookie_2': 'A%7CB%7CC%7CD%7CE%7CF%7CG%7CH1%7CH2%7CI1%7CI2%7CJ1%7CJ2%7CK1%7CK2%7CL%7CM1%7CM2%7CN1%7CN2%7CO%7CP1%7CP2%7CQ%7CR%7CS1%7CS2%7CT%7CU%7CV',
+    'mb': 'N',
+    'pastQueryArr': '%uC18C%uBE44%uC790%uBB3C%uAC00%uC9C0%uC218',
+    'PCID': '16513851736995578911351',
+    'KOSISMyViewStatisCookie': '101%7CDT_1J20003%7C%uC18C%uBE44%uC790%uBB3C%uAC00%uC9C0%uC218%282020%3D100%29%u2502101%7CDT_1IN1502%7C%uC778%uAD6C%2C%20%uAC00%uAD6C%20%uBC0F%20%uC8FC%uD0DD%20-%20%uC74D%uBA74%uB3D9%282015%2C2020%29%2C%20%uC2DC%uAD70%uAD6C%282016%7E2019%29%u2502101%7CDT_1J20041%7C%uC5F0%uB3C4%uBCC4%20%uC18C%uBE44%uC790%uBB3C%uAC00%20%uB4F1%uB77D%uB960%u2502',
+    'JSESSIONID': 'h9gU5JUCuxt9bdoAI0wYC1Aryihu0DFcwcihum71Dd8BvC7H7RuWRofFQUlWHKi2.STAT_WAS1_servlet_engine5',
+    'clientid': '040029824177',
+}
+PRICES_DOWN_HEADER = {
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+    'Accept-Encoding': 'gzip, deflate, br',
+    'Accept-Language': 'ko,en-US;q=0.9,en;q=0.8,ko-KR;q=0.7',
+    'Cache-Control': 'max-age=0',
+    'Connection': 'keep-alive',
+    'Content-Length': '8543',
+    'Content-Type': 'application/x-www-form-urlencoded',
+    'Host': 'kosis.kr',
+    'Origin': 'https://kosis.kr',
+    'Referer': 'https://kosis.kr/statHtml/statHtmlContent.do',
+    'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="100", "Google Chrome";v="100"',
+    'sec-ch-ua-mobile': '?0',
+    'sec-ch-ua-platform': '"macOS"',
+    'Sec-Fetch-Dest': 'iframe',
+    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Site': 'same-origin',
+    'Sec-Fetch-User': '?1',
+    'Upgrade-Insecure-Requests': '1',
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36',
+}
+
+
+def create_price_data():
+    PRICES_DATA = []
+    data_1 = [
+        ('jsonStr', ''),
+        ('orgId', '101'),
+        ('tblId', 'DT_1J20003'),
+        ('language', 'ko'),
+        ('file', ''),
+        ('analText', ''),
+        ('scrId', ''),
+    ]
+
+    today = date.today()
+    today_ym = today.strftime("%Y%m%d")
+    date_data = pd.date_range('19650101', today_ym)
+    date_data_list_sort = list(set(date_data.format(formatter=lambda x: x.strftime('%Y%m'))))
+    date_data_list_reverse = date_data_list_sort
+    date_data_list_sort.sort()
+    date_data_list_reverse.reverse()
+    date_data = ','.join(date_data_list_sort)
+    data_2 = [
+        ('fieldList',
+         f'[{{"targetId":"PRD","targetValue":"","prdValue":"M,{date_data},@"}},'
+         '{"targetId":"ITM_ID","targetValue":"T","prdValue":""},'
+         '{"targetId":"OV_L1_ID","targetValue":"T10","prdValue":""}]'),
+    ]
+    data_3 = [
+        ('colAxis', 'TIME'),
+        ('rowAxis', 'C'),
+        ('isFirst', 'N'),
+        ('contextPath', '/statHtml'),
+        ('ordColIdx', ''),
+        ('ordType', ''),
+        ('logSeq', '129285323'),
+        ('vwCd', 'MT_ZTITLE'),
+        ('listId', 'P2_6'),
+        ('connPath', 'MT_ZTITLE'),
+        ('statId', '1964001'),
+        ('pub', ''),
+        ('pubLog', '4'),
+        ('viewKind', '2'),
+        ('viewSubKind', '2_3'),
+        ('doAnal', 'N'),
+        ('analType', ''),
+        ('analCmpr', ''),
+        ('analTime', ''),
+        ('analCombo', ''),
+        ('originData', ''),
+        ('analClass', ''),
+        ('analItem', ''),
+        ('obj_var_id', ''),
+        ('itm_id', ''),
+        ('mode', ''),
+        ('dataOpt', 'ko'),
+        ('noSelect', ''),
+        ('view', 'csv'),
+        ('analWithCHGRATE', ''),
+        ('defaulPeriodArr', '{"M":[202203,202202,202201,202112,202111,202110]}'),
+        ('defaultClassArr', '[{"objVarId":"C","data":["T10"],"classType":1,"classLvlCnt":1}]'),
+        ('existStblCmmtKor', 'Y'),
+        ('existStblCmmtEng', 'Y'),
+        ('classAllArr', '[{"objVarId":"C","ovlSn":"1"}]'),
+        ('classSet', '[{"objVarId":"C","ovlSn":"1","visible":"true"}]'),
+        ('selectAllFlag', 'N'),
+        ('selectTimeRangeCnt', ''),
+        ('periodStr', 'M#Q#Y'),
+        ('funcPrdSe', 'M'),
+        ('tblNm', '소비자물가지수(2020=100)'),
+        ('tblEngNm', 'CPI(2020=100))'),
+        ('isChangedDataOpt', ''),
+        ('itemMultiply', '1'),
+        ('dimCo', ''),
+        ('dbUser', 'NSI.'),
+        ('usePivot', 'N'),
+        ('isChangedTableType', 'N'),
+        ('isChangedPeriodCo', 'N'),
+        ('isChangedPrdSort', 'N'),
+        ('p_chkStatus', ''),
+        ('p_objVarId', ''),
+        ('p_lvl', ''),
+        ('p_logicFlag', ''),
+        ('p_classAllChkYn', 'N'),
+        ('p_classAllSelectYn', 'N'),
+        ('useAddFuncLog', ''),
+        ('chargerLvl', ''),
+        ('st', ''),
+        ('new_win', ''),
+        ('first_open', ''),
+        ('debug', ''),
+        ('maxCellOver', ''),
+        ('reqCellCnt', '687'),
+        ('inheritYn', 'N'),
+        ('originOrgId', ''),
+        ('originTblId', ''),
+        ('pubSeType', ''),
+        ('relChkOrgId', ''),
+        ('relChkTblId', ''),
+        ('highLightStr', ''),
+        ('markType', ''),
+        ('docId', ''),
+        ('itmNm', ''),
+        ('cmmtChk', 'Y'),
+        ('labelOriginData', '원자료 함께 보기'),
+        ('diviSearchYn', ''),
+        ('orderStr', 'OV_L1_ID,TIME'),
+        ('startNum', '1'),
+        ('endNum', '687'),
+        ('colClsAt', 'N'),
+        ('analyzable', 'true'),
+        ('expDash', 'Y'),
+        ('downGridFileType', 'csv'),
+        ('downSort', 'asc'),
+        ('pointType', 'screen'),
+        ('downLargeFileType', 'excel'),
+        ('downLargeExprType', '1'),
+        ('downLargeSort', 'asc'),
+        ('prdSortPop', 'asc'),
+        ('naviInfo', 'tabItemText'),
+        ('naviInfo', 'C'),
+        ('naviInfo', 'tabTimeText'),
+        ('assayLeft', 'none'),
+        ('assayselectType', 'none'),
+        ('selectType', ''),
+        ('assayRight', 'none'),
+        ('tableType', 'default'),
+        ('dataOpt2', 'ko'),
+        ('periodCo', ''),
+        ('prdSort', 'asc'),
+        ('compValue', ''),
+        ('compValue01', ''),
+        ('compValue02', ''),
+    ]
+
+    PRICES_DATA.extend(data_1)
+    PRICES_DATA.extend(data_2)
+    PRICES_DATA.extend(data_3)
+    return PRICES_DATA
+
+
+def create_price_download_data(csv):
+    PRICES_DOWN_DATA = []
+    data_1 = [
+        ('jsonStr', ''),
+        ('orgId', '101'),
+        ('tblId', 'DT_1J20003'),
+        ('language', 'ko'),
+        ('file', f'{csv}'),
+        ('analText', ''),
+        ('scrId', ''),
+    ]
+
+    today = date.today()
+    today_ym = today.strftime("%Y%m%d")
+    date_data = pd.date_range('19650101', today_ym)
+    date_data_list_sort = list(set(date_data.format(formatter=lambda x: x.strftime('%Y%m'))))
+    date_data_list_reverse = date_data_list_sort
+    date_data_list_sort.sort()
+    date_data_list_reverse.reverse()
+    date_data = ','.join(date_data_list_sort)
+    data_2 = [
+        ('fieldList',
+         f'[{{"targetId":"PRD","targetValue":"","prdValue":"M,{date_data},@"}},'
+         '{"targetId":"ITM_ID","targetValue":"T","prdValue":""},'
+         '{"targetId":"OV_L1_ID","targetValue":"T10","prdValue":""}]'),
+    ]
+    data_3 = [
+        ('colAxis', 'TIME'),
+        ('rowAxis', 'C'),
+        ('isFirst', 'N'),
+        ('contextPath', '/statHtml'),
+        ('ordColIdx', ''),
+        ('ordType', ''),
+        ('logSeq', '129285323'),
+        ('vwCd', 'MT_ZTITLE'),
+        ('listId', 'P2_6'),
+        ('connPath', 'MT_ZTITLE'),
+        ('statId', '1964001'),
+        ('pub', ''),
+        ('pubLog', '4'),
+        ('viewKind', '2'),
+        ('viewSubKind', '2_3'),
+        ('doAnal', 'N'),
+        ('analType', ''),
+        ('analCmpr', ''),
+        ('analTime', ''),
+        ('analCombo', ''),
+        ('originData', ''),
+        ('analClass', ''),
+        ('analItem', ''),
+        ('obj_var_id', ''),
+        ('itm_id', ''),
+        ('mode', ''),
+        ('dataOpt', 'ko'),
+        ('noSelect', ''),
+        ('view', 'csv'),
+        ('analWithCHGRATE', ''),
+        ('defaulPeriodArr', '{"M":[202203,202202,202201,202112,202111,202110]}'),
+        ('defaultClassArr', '[{"objVarId":"C","data":["T10"],"classType":1,"classLvlCnt":1}]'),
+        ('existStblCmmtKor', 'Y'),
+        ('existStblCmmtEng', 'Y'),
+        ('classAllArr', '[{"objVarId":"C","ovlSn":"1"}]'),
+        ('classSet', '[{"objVarId":"C","ovlSn":"1","visible":"true"}]'),
+        ('selectAllFlag', 'N'),
+        ('selectTimeRangeCnt', ''),
+        ('periodStr', 'M#Q#Y'),
+        ('funcPrdSe', 'M'),
+        ('tblNm', '소비자물가지수(2020=100)'),
+        ('tblEngNm', 'CPI(2020=100))'),
+        ('isChangedDataOpt', ''),
+        ('itemMultiply', '1'),
+        ('dimCo', ''),
+        ('dbUser', 'NSI.'),
+        ('usePivot', 'N'),
+        ('isChangedTableType', 'N'),
+        ('isChangedPeriodCo', 'N'),
+        ('isChangedPrdSort', 'N'),
+        ('p_chkStatus', ''),
+        ('p_objVarId', ''),
+        ('p_lvl', ''),
+        ('p_logicFlag', ''),
+        ('p_classAllChkYn', 'N'),
+        ('p_classAllSelectYn', 'N'),
+        ('useAddFuncLog', ''),
+        ('chargerLvl', ''),
+        ('st', ''),
+        ('new_win', ''),
+        ('first_open', ''),
+        ('debug', ''),
+        ('maxCellOver', ''),
+        ('reqCellCnt', '687'),
+        ('inheritYn', 'N'),
+        ('originOrgId', ''),
+        ('originTblId', ''),
+        ('pubSeType', ''),
+        ('relChkOrgId', ''),
+        ('relChkTblId', ''),
+        ('highLightStr', ''),
+        ('markType', ''),
+        ('docId', ''),
+        ('itmNm', ''),
+        ('cmmtChk', 'Y'),
+        ('labelOriginData', '원자료 함께 보기'),
+        ('diviSearchYn', ''),
+        ('orderStr', 'OV_L1_ID,TIME'),
+        ('startNum', '1'),
+        ('endNum', '687'),
+        ('colClsAt', 'N'),
+        ('analyzable', 'true'),
+        ('expDash', 'Y'),
+        ('downGridFileType', 'csv'),
+        ('downSort', 'asc'),
+        ('pointType', 'screen'),
+        ('downLargeFileType', 'excel'),
+        ('downLargeExprType', '1'),
+        ('downLargeSort', 'asc'),
+        ('prdSortPop', 'asc'),
+        ('naviInfo', 'tabItemText'),
+        ('naviInfo', 'C'),
+        ('naviInfo', 'tabTimeText'),
+        ('assayLeft', 'none'),
+        ('assayselectType', 'none'),
+        ('selectType', ''),
+        ('assayRight', 'none'),
+        ('tableType', 'default'),
+        ('dataOpt2', 'ko'),
+        ('periodCo', ''),
+        ('prdSort', 'asc'),
+        ('compValue', ''),
+        ('compValue01', ''),
+        ('compValue02', ''),
+    ]
+    PRICES_DOWN_DATA.extend(data_1)
+    PRICES_DOWN_DATA.extend(data_2)
+    PRICES_DOWN_DATA.extend(data_3)
+    return PRICES_DOWN_DATA
