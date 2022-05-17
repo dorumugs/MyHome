@@ -16,5 +16,11 @@ class ExtendsExport(CoreExport):
         self.logger.info(f"Import {target} Data")
         self.qes.export_elasticsearch_func(index_nm, mapping, csv, target)
 
-    def call_export_data_to_mongo(self, db, collection, csv_file):
-        self.export_mongo_func(self, db, collection, csv_file)
+    def call_remove_export_data_to_mongo(self, input_type, csv_file):
+        db = self.mg.client[self.database_config.MONGODB_DB]
+        self.remove_collection_mongo_func(db, input_type)
+        self.export_collection_mongo_func(db, input_type, csv_file)
+
+    def call_export_data_to_mongo(self, input_type, csv_file):
+        db = self.mg.client[self.database_config.MONGODB_DB]
+        self.export_collection_mongo_func(db, input_type, csv_file)

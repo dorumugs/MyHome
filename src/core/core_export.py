@@ -17,7 +17,22 @@ class CoreExport(object):
         df = df.replace([np.inf, -np.inf], 0)
         self.qes.parallel_bulk_insert(index_nm, self.qes.iter_source(target=target, index_nm=index_nm, dataframe=df))
 
-    def export_mongo_func(self, db, collection, csv_file):
-        df = pd.read_csv(csv_file, sep='|', encoding='utf-8', low_memory=False)
+    @staticmethod
+    def remove_collection_mongo_func(db, collection):
+        db[collection].drop()
+
+    @staticmethod
+    def export_collection_mongo_func(db, collection, csv_file):
         col = db[collection]
-        col.insert_many(df.to_dict('records'))
+        df = pd.read_csv(csv_file, sep='|', encoding='utf-8', low_memory=False)
+        df_dict = df.to_dict('records')
+
+        df_dict_len = len(df_dict)
+        multiple = 1000
+        total_count = int(df_dict_len / multiple)
+        remains = df_dict_len % multiple
+        for i in range(total_count):
+            if i+1 != total_count:
+                col.insert_many(df_dict[i * multiple: (i * multiple) + multiple])
+            else:
+                col.insert_many(df_dict[i * multiple: (i * multiple) + multiple + remains])

@@ -2,6 +2,7 @@ from src.extends.extends_extract import ExtendsExtract
 from src.extends.extends_transform import ExtendsTransform
 from src.extends.extends_export import ExtendsExport
 from utils.database.extends_elasticsearch import QelasticSearch
+from utils.database.extends_mongo import ExtendsMongo
 from utils.os_utils.extends_os_utils import ExtendsOsUtils
 from config.molit_go_kr.actual_tx_and_chartered_rent import *
 from config.project_env.molit_profile import *
@@ -127,6 +128,25 @@ class MyHome(object):
             self.export.call_export_data_to_elasticsearch(index_nm, mapping, csv, target)
 
     def export_mongodb(self):
-        export_list = {
+        export_csv_list = {
+            "code": "code.csv",
+            "AC_CH": "ac_ch.csv",
             "GDP": "GDP_pre.csv",
+            "POPULATION": "population_pre.csv",
+            "PRICE": "PRICE_pre.csv",
+            "UNSOLD": "UNSOLD_pre.csv",
         }
+
+        export_final_list = {
+            "ACTUAL_MASTER": "actual_tx_master.csv",
+            "CHARTERED_RENT_MASTER": "chartered_rent_master.csv",
+            "ACTUAL_DETAIL": "actual_tx_detail.csv",
+            "CHARTERED_RENT_DETAIL": "chartered_rent_detail.csv"
+        }
+
+        for key, value in export_csv_list.items():
+            self.export.call_remove_export_data_to_mongo(key, CSV_DIRECTORY + value)
+
+        for key, value in export_final_list.items():
+            self.export.call_remove_export_data_to_mongo(key, AC_CH_FINAL_DIRECTORY + value)
+            #self.export.call_export_data_to_mongo(key, AC_CH_FINAL_DIRECTORY + value)
