@@ -4,6 +4,9 @@ from utils.log import logger
 from config.project_env.directory_config import *
 from config.molit_go_kr.actual_tx_and_chartered_rent import *
 from config.kosis_kr.population import *
+from config.kosis_kr.population_post import *
+from config.kosis_kr.population_full import *
+from config.kosis_kr.population_full_post import *
 from config.kosis_kr.prices import *
 from config.kosis_kr.unsold import *
 from config.index_go_kr.gdp import *
@@ -67,7 +70,7 @@ class ExtendsExtract(CoreExtract):
         return df
 
     @staticmethod
-    def get_kosis_data(get_type, csv, url, headers, cookies, data):
+    def get_kosis_data(get_type, csv, url, headers, cookies, data, date_data=None):
         response = requests.get(url, headers=headers, cookies=cookies, data=data)
         text = json.loads(response.text)
         res_file = text['file']
@@ -82,6 +85,18 @@ class ExtendsExtract(CoreExtract):
             POPULATION_DOWN_DATA = make_population_down_data(res_file)
             response = requests.get(POPULATION_DOWN_URL, headers=POPULATION_DOWN_HEADER,
                                     cookies=POPULATION_DOWN_COOKIES, data=POPULATION_DOWN_DATA)
+        elif get_type == 'POPULATION_POST':
+            POPULATION_DOWN_POST_DATA = make_population_post_down_data(res_file)
+            response = requests.get(POPULATION_DOWN_POST_URL, headers=POPULATION_DOWN_POST_HEADER,
+                                    cookies=POPULATION_DOWN_POST_COOKIES, data=POPULATION_DOWN_POST_DATA)
+        elif get_type == 'POPULATION_FULL':
+            POPULATION_FULL_DOWN_DATA = make_population_full_down_data(res_file, date_data)
+            response = requests.get(POPULATION_FULL_DOWN_URL, headers=POPULATION_FULL_DOWN_HEADER,
+                                    cookies=POPULATION_FULL_DOWN_COOKIES, data=POPULATION_FULL_DOWN_DATA)
+        elif get_type == 'POPULATION_FULL_POST':
+            POPULATION_FULL_POST_DOWN_DATA = make_population_full_post_down_data(res_file, date_data)
+            response = requests.get(POPULATION_FULL_POST_DOWN_URL, headers=POPULATION_FULL_POST_DOWN_HEADER,
+                                    cookies=POPULATION_FULL_POST_DOWN_COOKIES, data=POPULATION_FULL_POST_DOWN_DATA)
 
         with open(csv, 'wb') as fd:
             for chunk in response.iter_content(chunk_size=1024):
@@ -112,6 +127,46 @@ class ExtendsExtract(CoreExtract):
         elif get_type == 'POPULATION':
             csv = CSV_DIRECTORY + "population.csv"
             self.get_kosis_data(get_type, csv, POPULATION_URL, POPULATION_HEADERS, POPULATION_COOKIES, POPULATION_DATA)
+        elif get_type == 'POPULATION_POST':
+            csv = CSV_DIRECTORY + "population_post.csv"
+            self.get_kosis_data(get_type, csv, POPULATION_POST_URL, POPULATION_POST_HEADERS, POPULATION_POST_COOKIES,
+                                POPULATION_POST_DATA)
+        elif get_type == 'POPULATION_FULL':
+            csv = CSV_DIRECTORY + "population_full.csv"
+            currentyear_2020 = '2020'
+            currentyear_2015 = '2015'
+            index = sorted(list(
+                set(
+                    [x.strftime('%Y') for x in pd.date_range(start=currentyear_2015, end=currentyear_2020).to_list()]
+                )
+            ), reverse=True)
+            index = [str(x) for x in index if int(x) % 5 == 0]
+
+            df = pd.DataFrame()
+            for i in index:
+                self.get_kosis_data(get_type, csv, POPULATION_FULL_URL, POPULATION_FULL_HEADERS, POPULATION_FULL_COOKIES,
+                                    make_population_full_data(i), i)
+                pop = pd.read_csv(csv, sep=',', encoding='cp949')
+                df = pd.concat([df, pop], axis=0)
+            df.to_csv(csv, sep=',', na_rep='NaN', index=False, encoding='cp949')
+        elif get_type == 'POPULATION_FULL_POST':
+            csv = CSV_DIRECTORY + "population_full_post.csv"
+            df = pd.DataFrame()
+            for index in POPULATION_FULL_POST_INDEX:
+                self.get_kosis_data(get_type, csv, POPULATION_FULL_POST_URL, POPULATION_FULL_POST_HEADERS,
+                                    POPULATION_FULL_POST_COOKIES,
+                                    make_population_full_post_data(index), index)
+                pop = pd.read_csv(csv, sep=',', encoding='cp949')
+                pop = pop.rename(columns={
+                    '행정구역별': '행정구역별(읍면동)',
+                    '시점': '시점',
+                    '인구 (명)': '총인구 (명)',
+                    '일반가구 (가구)': '일반가구 (가구)',
+                    '일반가구수 (가구)': '일반가구 (가구)',
+                    '가구 (가구)': '일반가구 (가구)'
+                })
+                df = pd.concat([df, pop], axis=0)
+            df.to_csv(csv, sep=',', na_rep='NaN', index=False, encoding='cp949')
         elif get_type == 'UNSOLD':
             csv = CSV_DIRECTORY + "UNSOLD.csv"
             self.get_kosis_data(get_type, csv, UNSOLD_URL, UNSOLD_HEADERS, UNSOLD_COOKIES, create_unsold_data())

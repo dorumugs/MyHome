@@ -178,20 +178,18 @@ class ExtendsTransform(CoreTransform):
         ac_tx = pd.merge(ac_tx, ac_ch, how='left', left_on=['시도명', '시군구명', '년', '월', '분기'],
                          right_on=['시도명', '시군구명', '년', '월', '분기'])
         ac_tx = ac_tx[['시도명', '시군구명', '법정동', '지번', '지역코드', '건축년도', '아파트', '전용면적', '층', '거래일',
-                       '거래금액', '년', '월', '일', '분기', '총인구 (명)', 'Nominal_GDP_년', 'Nominal_GDP_분기', 'Real_GDP_년',
+                       '거래금액', '년', '월', '일', '분기', '총인구_명', 'Nominal_GDP_년', 'Nominal_GDP_분기', 'Real_GDP_년',
                        'Real_GDP_분기', '총지수_물가_년', '총지수_물가_분기', '미분양_개수_년', '미분양_개수_분기', '거래금액_년',
                        '거래금액_분기', '거래금액_월', '보증금액_년', '보증금액_분기', '보증금액_월', '전세가율_년', '전세가율_분기',
                        '전세가율_월']]
-        ac_tx = ac_tx.rename(columns={'총인구 (명)': '총인구_명'})
 
         ch_tx = pd.merge(ch_tx, ac_ch, how='left', left_on=['시도명', '시군구명', '년', '월', '분기'],
                          right_on=['시도명', '시군구명', '년', '월', '분기'])
         ch_tx = ch_tx[['시도명', '시군구명', '법정동', '지번', '지역코드', '건축년도', '아파트', '전용면적', '층', '거래일',
-                       '보증금액', '월세금액', '년', '월', '일', '분기', '총인구 (명)', 'Nominal_GDP_년', 'Nominal_GDP_분기',
+                       '보증금액', '월세금액', '년', '월', '일', '분기', '총인구_명', 'Nominal_GDP_년', 'Nominal_GDP_분기',
                        'Real_GDP_년', 'Real_GDP_분기', '총지수_물가_년', '총지수_물가_분기', '미분양_개수_년', '미분양_개수_분기',
                        '거래금액_년', '거래금액_분기', '거래금액_월', '보증금액_년', '보증금액_분기', '보증금액_월', '전세가율_년',
                        '전세가율_분기', '전세가율_월']]
-        ch_tx = ch_tx.rename(columns={'총인구 (명)': '총인구_명'})
 
         ac_ch = ac_tx[['시도명', '시군구명', '년', '월', '분기', '거래금액_년', '거래금액_분기', '거래금액_월',
                        '보증금액_년', '보증금액_분기', '보증금액_월', '전세가율_년', '전세가율_분기', '전세가율_월',
@@ -237,25 +235,26 @@ class ExtendsTransform(CoreTransform):
 
     @staticmethod
     def tx_pre(tx_origin, region_pop, gdp, price, unsold):
-        tx = pd.merge(tx_origin, region_pop, how='left', left_on='지역코드', right_on='시군구').drop(columns=['시군구'])
+        tx = pd.merge(tx_origin, region_pop, how='left', left_on=['지역코드', '년'], right_on=['시군구', '시점']).drop(columns=['시군구', '시점'])
         tx = pd.merge(tx, gdp, how='left', left_on=['년', '분기'], right_on=['년', '분기'])
         tx = pd.merge(tx, price, how='left', left_on=['년', '분기'], right_on=['년', '분기'])
         tx = pd.merge(tx, unsold, how='left', left_on=['시도명', '년', '분기'], right_on=['시도명', '년', '분기'])
         return tx
 
     def tx_data_all_pre(self):
+        #시군구,시도명,시군구명,총인구_명,시점
         region_pop = pd.read_csv(CSV_DIRECTORY + "region_pop_full.csv", sep=',', encoding='utf-8', low_memory=False)
-        region_pop = region_pop[['시군구', '시도명', '시군구명', '총인구 (명)']].drop_duplicates()
+        region_pop = region_pop[['시군구', '시도명', '시군구명', '총인구_명', '시점']].drop_duplicates()
         gdp = pd.read_csv(CSV_DIRECTORY + "GDP_pre.csv", sep='|')
         price = pd.read_csv(CSV_DIRECTORY + "PRICE_pre.csv", sep='|')
         unsold = pd.read_csv(CSV_DIRECTORY + "UNSOLD_pre.csv", sep='|')
 
         actual_tx = pd.read_csv(AC_CH_FINAL_DIRECTORY + "pre_actual_tx.csv", sep='|', encoding='utf-8',
                                 low_memory=False)
-        actual_tx = actual_tx[actual_tx['년'] >= 2011]
+        # actual_tx = actual_tx[actual_tx['년'] >= 2011]
         chartered_rent = pd.read_csv(AC_CH_FINAL_DIRECTORY + "pre_chartered_rent.csv", sep='|',
                                      encoding='utf-8', low_memory=False)
-        chartered_rent = chartered_rent[chartered_rent['년'] >= 2011]
+        # chartered_rent = chartered_rent[chartered_rent['년'] >= 2011]
 
         ac_tx = self.tx_pre(actual_tx, region_pop, gdp, price, unsold)
         ch_tx = self.tx_pre(chartered_rent, region_pop, gdp, price, unsold)
@@ -272,25 +271,25 @@ class ExtendsTransform(CoreTransform):
         ch_tx_pre = ch_tx_pre.replace(' ', '')
         ch_tx_pre = ch_tx_pre.replace('', 0)
         ch_tx_pre.to_csv(AC_CH_FINAL_DIRECTORY + "chartered_rent_master.csv", sep='|', index=False)
-        os.remove(AC_CH_FINAL_DIRECTORY + "pre_actual_tx.csv")
-        os.remove(AC_CH_FINAL_DIRECTORY + "pre_chartered_rent.csv")
+        # os.remove(AC_CH_FINAL_DIRECTORY + "pre_actual_tx.csv")
+        # os.remove(AC_CH_FINAL_DIRECTORY + "pre_chartered_rent.csv")
 
     @staticmethod
     def city_name(x):
         pop_city_index_file = open("./config/POP_CITY_INDEX.txt", "r")
         content = pop_city_index_file.read()
         pop_city_index = content.split(",")
+        pop_city_index = [i for i in pop_city_index if i != '']
         pop_city_index_file.close()
 
         pop_city_list_file = open("./config/POP_CITY_LIST.txt", "r")
         content = pop_city_list_file.read()
         pop_city_list = content.split(",")
+        pop_city_list = [i for i in pop_city_list if i != '']
         pop_city_list_file.close()
 
         for i in range(len(pop_city_index)):
             if i != len(pop_city_index) - 1:
-
-                # print(x.name, pop_city_list[i], pop_city_list[i+1])
                 if x.name >= int(pop_city_index[i]) and x.name < int(pop_city_index[i + 1]):
                     return pop_city_list[i]
             else:
@@ -298,8 +297,7 @@ class ExtendsTransform(CoreTransform):
                     return pop_city_list[i]
 
     @staticmethod
-    def population_settings():
-        pop = pd.read_csv(CSV_DIRECTORY + "population.csv", sep=',', encoding='cp949')
+    def population_settings(csv, pop):
         region_code = pd.read_csv(REGION_CODE_DIRECTORY + "REGION_CODE_FULL.csv", sep='|', encoding='utf-8',
                                   low_memory=False)
         city = pd.DataFrame(region_code.시도명.value_counts()).reset_index().rename(columns={"index": "시도명", "시도명": "시군구"})
@@ -314,14 +312,37 @@ class ExtendsTransform(CoreTransform):
                 if pop_city_index[-1] != item:
                     f.write("%s," % item)
                 else:
-                    f.write("%s" % item)
+                    f.write("%s," % item)
 
         with open('./config/POP_CITY_LIST.txt', 'w') as f:
             for item in pop_city_list:
                 if pop_city_list[-1] != item:
                     f.write("%s," % item)
                 else:
-                    f.write("%s" % item)
+                    f.write("%s," % item)
+
+    @staticmethod
+    def population_full_settings(sgg_list, pop):
+        sgg_0 = [s.split('-')[0] for s in sgg_list]
+        sgg_1 = [s.split('-')[1] for s in sgg_list]
+        sgg_0.insert(0, sgg_1[0])
+        pop_city_index = pop[pop['행정구역별_읍면동'].isin(sgg_0)].index.to_list()
+        pop_city_list = pop[pop.index.isin(pop_city_index)]
+        pop_city_list = pop_city_list['행정구역별_읍면동'].to_list()
+
+        with open('./config/POP_CITY_INDEX.txt', 'w') as f:
+            for item in pop_city_index:
+                if pop_city_index[-1] != item:
+                    f.write("%s," % item)
+                else:
+                    f.write("%s," % item)
+
+        with open('./config/POP_CITY_LIST.txt', 'w') as f:
+            for item in pop_city_list:
+                if pop_city_list[-1] != item:
+                    f.write("%s," % item)
+                else:
+                    f.write("%s," % item)
 
     @staticmethod
     def remove_pop_city_files():
@@ -330,28 +351,26 @@ class ExtendsTransform(CoreTransform):
             if os.path.isfile(file):
                 os.remove(file)
 
-    def population_pre(self):
-        self.population_settings()
-        pop = pd.read_csv(CSV_DIRECTORY + "population.csv", sep=',', encoding='cp949')
+    def population_pre(self, input_csv, output_csv):
+        pop = pd.read_csv(CSV_DIRECTORY + input_csv, sep=',', encoding='cp949')
+        pop = pop.rename(columns={
+            '행정구역별': '행정구역별(읍면동)',
+            '시점': '시점',
+            '인구 (명)': '총인구 (명)'
+        })
+        self.population_settings(input_csv, pop)
         pop['시도명'] = pop.apply(self.city_name, axis=1)
+        pop['날짜'] = pop.시점.apply(lambda x: str(x) + '-01-01')
         self.remove_pop_city_files()
         pop = pop.replace('X', 0)
-        pop.to_csv(CSV_DIRECTORY + "population.csv", sep=',', na_rep='NaN', index=False)
         pop_pre = pop.rename(columns={
             '행정구역별(읍면동)': '행정구역별_읍면동',
+            '시점': '시점',
+            '날자': '날짜',
             '총인구 (명)': '총인구_명',
             '남자 (명)': '남자_명',
             '여자 (명)': '여자_명',
-            '내국인-계 (명)': '내국인-계_명',
-            '내국인-남자 (명)': '내국인-남자_명',
-            '내국인-여자 (명)': '내국인-여자_명',
-            '외국인-계 (명)': '외국인-계_명',
-            '외국인-남자 (명)': '외국인-남자_명',
-            '외국인-여자 (명)': '외국인-여자_명',
-            '가구-계 (가구)': '가구-계_가구',
             '일반가구 (가구)': '일반가구_가구',
-            '집단가구 (가구)': '집단가구_가구',
-            '외국인가구 (가구)': '외국인가구_가구',
             '주택-계 (호)': '주택-계_호',
             '단독주택 (호)': '단독주택_호',
             '아파트 (호)': '아파트_호',
@@ -361,7 +380,73 @@ class ExtendsTransform(CoreTransform):
             '주택이외의 거처 (호)': '주택이외의거처_호',
             '시도명': '시도명'
         })
-        pop_pre.to_csv(CSV_DIRECTORY + "population_pre.csv", sep='|', na_rep='NaN', index=False)
+        pop_pre.to_csv(CSV_DIRECTORY + output_csv, sep='|', na_rep='NaN', index=False)
+
+    def population_post_pre(self, left_csv, right_csv, output_csv):
+        left = pd.read_csv(CSV_DIRECTORY + left_csv, sep='|', encoding='utf-8')
+        left_remains = left[['행정구역별_읍면동', '시점', '총인구_명', '시도명', '날짜']]
+
+        right = pd.read_csv(CSV_DIRECTORY + right_csv, sep='|', encoding='utf-8')
+
+        full_df = pd.DataFrame()
+
+        date_list = sorted(list(set(right['시점'].to_list())), reverse=True)
+        for d in date_list:
+            right_date = right[right['시점'] == d]
+            add_date = right_date[['시점']]
+            add_remains = right_date[['행정구역별_읍면동', '총인구_명', '시도명']]
+            add_1 = pd.concat([(add_date + 1), add_remains], axis=1)
+            add_2 = pd.concat([(add_date + 2), add_remains], axis=1)
+            add_3 = pd.concat([(add_date + 3), add_remains], axis=1)
+            add_4 = pd.concat([(add_date + 4), add_remains], axis=1)
+            right_date = right_date.append(add_1[['행정구역별_읍면동', '시점', '총인구_명', '시도명']])
+            right_date = right_date.append(add_2[['행정구역별_읍면동', '시점', '총인구_명', '시도명']])
+            right_date = right_date.append(add_3[['행정구역별_읍면동', '시점', '총인구_명', '시도명']])
+            right_date = right_date.append(add_4[['행정구역별_읍면동', '시점', '총인구_명', '시도명']])
+            right_date['날짜'] = right_date.시점.apply(lambda x: str(x) + '-01-01')
+            full_df = full_df.append(right_date)
+
+        full_df = full_df.append(left_remains)
+        full_df.to_csv(CSV_DIRECTORY + output_csv, sep='|', na_rep='NaN', index=False)
+
+    def population_full_pre(self, left_csv, right_csv, output_csv):
+        left = pd.read_csv(CSV_DIRECTORY + left_csv, sep='|', encoding='utf-8')
+        right = pd.read_csv(CSV_DIRECTORY + right_csv, sep='|', encoding='utf-8')
+        right = pd.concat([left, right], axis=0)
+
+        full_df = pd.DataFrame()
+        date_list = sorted(list(set(right['시점'].to_list())), reverse=True)
+        for d in date_list:
+            right_date = right[right['시점'] == d]
+            add_date = right_date[['시점']]
+            add_remains = right_date[['행정구역별_읍면동', '총인구_명', '일반가구_가구', '시도명']]
+            add_1 = pd.concat([(add_date + 1), add_remains], axis=1)
+            add_2 = pd.concat([(add_date + 2), add_remains], axis=1)
+            add_3 = pd.concat([(add_date + 3), add_remains], axis=1)
+            add_4 = pd.concat([(add_date + 4), add_remains], axis=1)
+            right_date = right_date.append(add_1[['행정구역별_읍면동', '시점', '총인구_명', '일반가구_가구', '시도명']])
+            right_date = right_date.append(add_2[['행정구역별_읍면동', '시점', '총인구_명', '일반가구_가구', '시도명']])
+            right_date = right_date.append(add_3[['행정구역별_읍면동', '시점', '총인구_명', '일반가구_가구', '시도명']])
+            right_date = right_date.append(add_4[['행정구역별_읍면동', '시점', '총인구_명', '일반가구_가구', '시도명']])
+            right_date['날짜'] = right_date.시점.apply(lambda x: str(x) + '-01-01')
+            full_df = full_df.append(right_date)
+        full_df.to_csv(CSV_DIRECTORY + output_csv, sep='|', na_rep='NaN', index=False)
+
+        full_df = pd.read_csv(CSV_DIRECTORY + output_csv, sep='|', encoding='utf-8')
+        sgg = pd.read_csv(CSV_DIRECTORY + 'population_pre.csv', sep='|', encoding='utf-8')
+        sgg['행정구역별_시도명'] = sgg.apply(lambda x: x['행정구역별_읍면동'] + '-' + x['시도명'], axis=1)
+        sgg_list = list(set(sgg['행정구역별_시도명'].to_list()))
+        sdm_list = list(set(sgg['시도명'].to_list()))
+        df = pd.DataFrame()
+        for sdm in sdm_list:
+            s = list(filter(lambda x: sdm in x, sgg_list))
+            df_split = full_df[full_df['시도명'] == sdm].copy()
+            self.population_full_settings(s, df_split)
+            df_split['시군구명'] = df_split.apply(self.city_name, axis=1)
+            df = pd.concat([df, df_split], axis=0)
+        df = df[['행정구역별_읍면동', '시군구명', '시도명', '시점', '총인구_명', '일반가구_가구', '날짜']]
+        df.to_csv(CSV_DIRECTORY + output_csv.split('.')[0] + '_extend.csv', sep='|', na_rep='NaN', index=False)
+
 
     def price_pre(self):
         price = pd.read_csv(CSV_DIRECTORY + "PRICE.csv", sep=',', encoding='cp949')
@@ -513,31 +598,40 @@ class ExtendsTransform(CoreTransform):
             gdp = self.gdp_pre(gdp=gdp, start=1961, end=2022)
             gdp.to_csv(CSV_DIRECTORY + "GDP_pre.csv", sep='|', na_rep='NaN', index=False)
         elif pre_type == 'POPULATION':
-            f = open(CSV_DIRECTORY + "population.csv", 'rt', encoding='cp949')
-            lines = f.readlines()
-            lines = lines[1:]
-            f.close()
-            f = open(CSV_DIRECTORY + "population.csv", 'wt', encoding='cp949')
-            for line in lines:
-                f.write(line)
-            f.close()
-            self.population_pre()
+            self.population_pre(input_csv="population.csv", output_csv="population_pre.csv")
+        elif pre_type == 'POPULATION_POST':
+            self.population_pre(input_csv="population_post.csv", output_csv="population_post_pre.csv")
+            self.population_post_pre(left_csv="population_pre.csv", right_csv="population_post_pre.csv",
+                                     output_csv="population_pre.csv")
+        elif pre_type == 'POPULATION_FULL_POST':
+            self.population_pre(input_csv="population_full.csv", output_csv="population_full_pre.csv")
+            self.population_pre(input_csv="population_full_post.csv", output_csv="population_full_post_pre.csv")
+            self.population_full_pre(left_csv="population_full_pre.csv", right_csv="population_full_post_pre.csv",
+                                     output_csv="population_full_pre.csv")
         elif pre_type == 'REGION_POP':
             region_code_full = pd.read_csv(REGION_CODE_DIRECTORY + "REGION_CODE_FULL.csv", sep='|', encoding='utf-8',
                                            low_memory=False)
-            pop = pd.read_csv(CSV_DIRECTORY + "population.csv", sep=',', encoding='utf-8')
+            pop = pd.read_csv(CSV_DIRECTORY + "population_pre.csv", sep='|', encoding='utf-8')
             region_code_full = region_code_full[['시군구', '시도명', '시군구명', '법정읍면동명']]
-            region_code_full['시군구명'] = region_code_full['시군구명'].apply(lambda x: self.city_town_name(str(x)))
+            # region_code_full['시군구명'] = region_code_full['시군구명'].apply(lambda x: self.city_town_name(str(x)))
             region_code_full['시군구명'] = region_code_full.apply(lambda x: '세종특별자치시' if x.시도명 == '세종특별자치시' else x.시군구명,
                                                               axis=1)
-            region_pop = pd.merge(region_code_full[['시군구', '시도명', '시군구명', '법정읍면동명']],
-                                  pop[['행정구역별(읍면동)', '시도명', '총인구 (명)']],
-                                  how='left', left_on=['시도명', '시군구명'],
-                                  right_on=['시도명', '행정구역별(읍면동)']).drop(columns=['행정구역별(읍면동)'])
+            region_pop = pd.merge(region_code_full[['시군구', '시도명', '시군구명']].drop_duplicates().reset_index(drop=True),
+                                  pop[['행정구역별_읍면동', '시도명', '총인구_명', '시점']],
+                                  how='right', left_on=['시도명', '시군구명'],
+                                  right_on=['시도명', '행정구역별_읍면동']).drop(columns=['행정구역별_읍면동'])
+            region_pop = region_pop.dropna(axis=0)
+            region_pop = region_pop.astype({
+                '시군구': 'int',
+                '시도명': 'str',
+                '시군구명': 'str',
+                '총인구_명': 'int',
+                '시점': 'int'
+            })
             region_pop.to_csv(CSV_DIRECTORY + "region_pop_full.csv", sep=',', na_rep='NaN', index=False)
-            region_pop = pd.read_csv(CSV_DIRECTORY + "region_pop_full.csv", sep=',', encoding='utf-8', low_memory=False)
-            region_pop.drop_duplicates(keep='first').to_csv(CSV_DIRECTORY + "region_pop_full.csv", sep=',', na_rep='NaN',
-                                                            index=False)
+            # region_pop = pd.read_csv(CSV_DIRECTORY + "region_pop_full.csv", sep=',', encoding='utf-8', low_memory=False)
+            # region_pop.drop_duplicates(keep='first').to_csv(CSV_DIRECTORY + "region_pop_full.csv", sep=',', na_rep='NaN',
+            #                                                 index=False)
         elif pre_type == 'REG_REGION_CODE':
             with zipfile.ZipFile(CSV_DIRECTORY + "code.zip", 'r') as zf:
                 zip_info = zf.infolist()

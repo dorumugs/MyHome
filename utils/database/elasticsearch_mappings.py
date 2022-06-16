@@ -1,5 +1,5 @@
 GDP_MAPPING = {
-    'info': {'index_nm': 'gdp'},
+    'info': {'index_nm': 'year_quarter_gdp'},
     'mapping': {
         "mappings": {
             "properties": {
@@ -33,7 +33,7 @@ GDP_MAPPING = {
 }
 
 POPULATION_MAPPING = {
-    'info': {'index_nm': 'population'},
+    'info': {'index_nm': 'year_population'},
     'mapping': {
         "mappings": {
             "properties": {
@@ -49,64 +49,10 @@ POPULATION_MAPPING = {
                         }
                     }
                 },
+                "시점": {
+                    "type": "integer"
+                },
                 "총인구_명": {
-                    "type": "integer"
-                },
-                "남자_명": {
-                    "type": "integer"
-                },
-                "여자_명": {
-                    "type": "integer"
-                },
-                "내국인-계_명": {
-                    "type": "integer"
-                },
-                "내국인-남자_명": {
-                    "type": "integer"
-                },
-                "내국인-여자_명": {
-                    "type": "integer"
-                },
-                "외국인-계_명": {
-                    "type": "integer"
-                },
-                "외국인-남자_명": {
-                    "type": "integer"
-                },
-                "외국인-여자_명": {
-                    "type": "integer"
-                },
-                "가구-계_가구": {
-                    "type": "integer"
-                },
-                "일반가구_가구": {
-                    "type": "integer"
-                },
-                "집단가구_가구": {
-                    "type": "integer"
-                },
-                "외국인가구_가구": {
-                    "type": "integer"
-                },
-                "주택-계_호": {
-                    "type": "integer"
-                },
-                "단독주택_호": {
-                    "type": "integer"
-                },
-                "아파트_호": {
-                    "type": "integer"
-                },
-                "연립주택_호": {
-                    "type": "integer"
-                },
-                "다세대주택_호": {
-                    "type": "integer"
-                },
-                "비거주용건물내주택_호": {
-                    "type": "integer"
-                },
-                "주택이외의거처_호": {
                     "type": "integer"
                 },
                 "시도명": {
@@ -118,13 +64,16 @@ POPULATION_MAPPING = {
                         }
                     }
                 },
+                "날짜": {
+                    "type": "date"
+                },
             }
         }
     },
 }
 
 PRICE_MAPPING = {
-    'info': {'index_nm': 'price'},
+    'info': {'index_nm': 'year_quarterprice'},
     'mapping': {
         "mappings": {
             "properties": {
@@ -152,7 +101,7 @@ PRICE_MAPPING = {
 }
 
 UNSOLD_MAPPING = {
-    'info': {'index_nm': 'unsold'},
+    'info': {'index_nm': 'year_quarter_unsold'},
     'mapping': {
         "mappings": {
             "properties": {

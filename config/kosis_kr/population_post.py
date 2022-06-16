@@ -4,8 +4,8 @@ from datetime import date
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
-POPULATION_URL = 'https://kosis.kr/statHtml/downGrid.do'
-POPULATION_COOKIES = {
+POPULATION_POST_URL = 'https://kosis.kr/statHtml/downGrid.do'
+POPULATION_POST_COOKIES = {
     'mb': 'N',
     'PCID': '16506134382599916704637',
     'newKOSIS2020StatisCtgrSettingCookie_2': 'A%7CB%7CC%7CD%7CE%7CF%7CG%7CH1%7CH2%7CI1%7CI2%7CJ1%7CJ2%7CK1%7CK2%7CL%7CM1%7CM2%7CN1%7CN2%7CO%7CP1%7CP2%7CQ%7CR%7CS1%7CS2%7CT%7CU%7CV',
@@ -14,7 +14,7 @@ POPULATION_COOKIES = {
     'clientid': '060075621396',
     'KOSISMyViewStatisCookie': '101%7CDT_1IN1502%7C%uC778%uAD6C%2C%20%uAC00%uAD6C%20%uBC0F%20%uC8FC%uD0DD%20-%20%uC74D%uBA74%uB3D9%282015%2C2020%29%2C%20%uC2DC%uAD70%uAD6C%282016%7E2019%29%u2502101%7CDT_1IN1509%7C%uC131%2C%20%uC5F0%uB839%20%uBC0F%20%uC138%uB300%uAD6C%uC131%uBCC4%20%uC778%uAD6C%20-%20%uC2DC%uAD70%uAD6C%u2502460%7CTX_315_2009_H1009%7C%uD589%uC815%uAD6C%uC5ED%20%uD604%uD669%u2502460%7CTX_315_2009_H1001%7C%uB3C4%uC2DC%uC9C0%uC5ED%20%uC778%uAD6C%uD604%uD669%28%uC2DC%uAD70%uAD6C%29%u2502101%7CDT_1IN1507%7C%uC131%2C%20%uC5F0%uB839%20%uBC0F%20%uAC00%uAD6C%uC8FC%uC640%uC758%20%uAD00%uACC4%uBCC4%20%uC778%uAD6C%20-%20%uC2DC%uAD70%uAD6C%u2502101%7CDT_1IN1503%7C%uC5F0%uB839%20%uBC0F%20%uC131%uBCC4%20%uC778%uAD6C%20-%20%uC74D%uBA74%uB3D9%282015%2C2020%29%2C%20%uC2DC%uAD70%uAD6C%282016%7E2019%29%u2502322%7CDT_32202_B044%7C%uC2DC%uAD70%uAD6C%uBCC4%20%uAE09%uC5EC%uC9C0%uAE09%20%uD604%uD669%u2502118%7CDT_118N_MON049%7C%uD589%uC815%uAD6C%uC5ED%28%uC2DC%uB3C4%29/%20%uC0B0%uC5C5/%uADDC%uBAA8%uBCC4%20%uC784%uAE08%20%uBC0F%20%uADFC%uB85C%uC2DC%uAC04%28%uC0C1%uC6A9%uADFC%uB85C%uC790%2C%uC0C1%uC6A9%uADFC%uB85C%uC790%205%uC778%uC774%uC0C1%20%uC0AC%uC5C5%uCCB4%29%u2502365%7CTX_36504_A000%7C%uD3C9%uADE0%20%uC784%uAE08%20%uD604%uD669%u2502'
 }
-POPULATION_HEADERS = {
+POPULATION_POST_HEADERS = {
     'Accept': 'application/json, text/javascript, */*; q=0.01',
     'Accept-Encoding': 'gzip, deflate, br',
     'Accept-Language': 'ko,en-US;q=0.9,en;q=0.8,ko-KR;q=0.7',
@@ -34,26 +34,27 @@ POPULATION_HEADERS = {
     'sec-ch-ua-platform': '"Windows"',
 }
 currentTimeDate = datetime.now() - relativedelta(years=2)
-currentyear = currentTimeDate.strftime('%Y')
-currentyear_5 = str(int(currentyear) - 5)
-index = ','.join(sorted(list(set([x.strftime('%Y') for x in pd.date_range(start=currentyear_5,
-                                                                          end=currentyear).to_list()])), reverse=True))
+currentyear_2010 = '2010'
+currentyear_1925 = '1925'
+index = sorted(list(set([x.strftime('%Y') for x in pd.date_range(start=currentyear_1925,
+                                                                 end=currentyear_2010).to_list()])), reverse=True)
+index = ','.join([x for x in index if int(x) % 5 == 0])
 
-POPULATION_DATA = [
+POPULATION_POST_DATA = [
     ('orgId', '101'),
-    ('tblId', 'DT_1IN1502'),
+    ('tblId', 'DT_1IN0001'),
     ('language', 'ko'),
     ('file', ''),
     ('analText', ''),
     ('scrId', ''),
-    ('fieldList', f'[{{"targetId":"PRD","targetValue":"","prdValue":"Y,{index},@"}},'
-                  '{"targetId":"ITM_ID","targetValue":"T100","prdValue":""},'
-                  '{"targetId":"ITM_ID","targetValue":"T200","prdValue":""},'
-                  '{"targetId":"ITM_ID","targetValue":"T312","prdValue":""},'
+    ('fieldList', f'[{{"targetId":"PRD","targetValue":"","prdValue":"F,{index},@"}},'
+                  '{"targetId":"ITM_ID","targetValue":"T10","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"00","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"04","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"05","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"03","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"0A","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"0B","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"0C","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"0D","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"0E","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"11","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"21","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"22","prdValue":""},'
@@ -61,7 +62,6 @@ POPULATION_DATA = [
                   '{"targetId":"OV_L1_ID","targetValue":"24","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"25","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"26","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"29","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"31","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"32","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"33","prdValue":""},'
@@ -71,6 +71,11 @@ POPULATION_DATA = [
                   '{"targetId":"OV_L1_ID","targetValue":"37","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"38","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"39","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"61","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"62","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"63","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"64","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"65","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"11010","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"11020","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"11030","prdValue":""},'
@@ -96,9 +101,9 @@ POPULATION_DATA = [
                   '{"targetId":"OV_L1_ID","targetValue":"11230","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"11240","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"11250","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"21004","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"21005","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"21003","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"2100C","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"2100D","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"2100E","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"21010","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"21020","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"21030","prdValue":""},'
@@ -114,10 +119,11 @@ POPULATION_DATA = [
                   '{"targetId":"OV_L1_ID","targetValue":"21130","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"21140","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"21150","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"21310","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"22004","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"22005","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"22003","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"21160","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"21800","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"2200C","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"2200D","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"2200E","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"22010","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"22020","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"22030","prdValue":""},'
@@ -125,10 +131,10 @@ POPULATION_DATA = [
                   '{"targetId":"OV_L1_ID","targetValue":"22050","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"22060","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"22070","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"22310","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"23004","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"23005","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"23003","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"22080","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"2300C","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"2300D","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"2300E","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"23010","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"23020","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"23030","prdValue":""},'
@@ -138,8 +144,8 @@ POPULATION_DATA = [
                   '{"targetId":"OV_L1_ID","targetValue":"23070","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"23080","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"23090","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"23310","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"23320","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"23100","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"23800","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"24010","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"24020","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"24030","prdValue":""},'
@@ -150,21 +156,18 @@ POPULATION_DATA = [
                   '{"targetId":"OV_L1_ID","targetValue":"25030","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"25040","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"25050","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"26004","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"26005","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"26003","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"2600C","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"2600D","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"2600E","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"26010","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"26020","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"26030","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"26040","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"26310","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"29004","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"29005","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"29003","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"29010","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"31004","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"31005","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"31003","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3100A","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3100C","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3100D","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3100E","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"31010","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"31011","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"31012","prdValue":""},'
@@ -182,6 +185,8 @@ POPULATION_DATA = [
                   '{"targetId":"OV_L1_ID","targetValue":"31051","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"31052","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"31053","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"31056","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"31057","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"31060","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"31070","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"31080","prdValue":""},'
@@ -190,6 +195,7 @@ POPULATION_DATA = [
                   '{"targetId":"OV_L1_ID","targetValue":"31092","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"31100","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"31101","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"31102","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"31103","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"31104","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"31110","prdValue":""},'
@@ -212,13 +218,39 @@ POPULATION_DATA = [
                   '{"targetId":"OV_L1_ID","targetValue":"31250","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"31260","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"31270","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"31280","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"31310","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"31320","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"31330","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"31340","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"31350","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"31360","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"31370","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"31380","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"32004","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"32005","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"32003","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"31390","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"31400","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"31410","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"31420","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"31430","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"31800","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"31810","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"31820","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"31830","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"31840","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"31850","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"31860","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"31870","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"31880","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"31890","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"31900","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"31910","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"31920","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"31930","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"31940","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"31950","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3200A","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3200C","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3200D","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3200E","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"32010","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"32020","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"32030","prdValue":""},'
@@ -237,16 +269,20 @@ POPULATION_DATA = [
                   '{"targetId":"OV_L1_ID","targetValue":"32390","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"32400","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"32410","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"33004","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"33005","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"33003","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"32800","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"32810","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"32820","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"32830","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3300A","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3300C","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3300D","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3300E","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"33010","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"33011","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"33012","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"33020","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"33030","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"33040","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"33041","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"33042","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"33043","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"33044","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"33310","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"33320","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"33330","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"33340","prdValue":""},'
@@ -255,9 +291,13 @@ POPULATION_DATA = [
                   '{"targetId":"OV_L1_ID","targetValue":"33370","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"33380","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"33390","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"34004","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"34005","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"34003","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"33800","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"33810","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"33820","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3400A","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3400C","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3400D","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3400E","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"34010","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"34011","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"34012","prdValue":""},'
@@ -267,20 +307,41 @@ POPULATION_DATA = [
                   '{"targetId":"OV_L1_ID","targetValue":"34050","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"34060","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"34070","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"34080","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"34310","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"34320","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"34330","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"34340","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"34350","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"34360","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"34370","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"34380","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"35004","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"35005","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"35003","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"34390","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"34400","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"34410","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"34800","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"34810","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"34820","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"34830","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"34840","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"34850","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"34860","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"34870","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"34880","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"34881","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"34882","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"34883","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"34884","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"34885","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"34886","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"34887","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3500A","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3500C","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3500D","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3500E","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"35010","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"35011","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"35012","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"35013","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"35020","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"35030","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"35040","prdValue":""},'
@@ -294,17 +355,27 @@ POPULATION_DATA = [
                   '{"targetId":"OV_L1_ID","targetValue":"35360","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"35370","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"35380","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"36004","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"36005","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"36003","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"35800","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"35810","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"35820","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"35830","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"35840","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"35850","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"35860","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3600A","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3600C","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3600D","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3600E","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"36010","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"36020","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"36030","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"36040","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"36050","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"36060","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"36310","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"36320","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"36330","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"36340","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"36350","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"36360","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"36370","prdValue":""},'
@@ -319,9 +390,26 @@ POPULATION_DATA = [
                   '{"targetId":"OV_L1_ID","targetValue":"36460","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"36470","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"36480","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"37004","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"37005","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"37003","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"36800","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"36810","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"36820","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"36830","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"36840","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"36850","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"36860","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"36861","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"36862","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"36863","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"36864","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"36865","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"36866","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"36867","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"36868","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"36869","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3700A","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3700C","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3700D","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3700E","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"37010","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"37011","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"37012","prdValue":""},'
@@ -347,10 +435,44 @@ POPULATION_DATA = [
                   '{"targetId":"OV_L1_ID","targetValue":"37410","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"37420","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"37430","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"38004","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"38005","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"38003","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"37800","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"37810","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"37820","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"37830","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"37840","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"37850","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"37860","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"37870","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"37880","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"37890","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"37900","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"37910","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"37911","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"37912","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"37913","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"37914","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"37915","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"37916","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"37918","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"37920","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3800A","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3800C","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3800D","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3800E","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"38010","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"38020","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"38021","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"38022","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"38023","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"38024","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"38025","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"38026","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"38027","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"38028","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"38030","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"38031","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"38032","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"38040","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"38050","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"38060","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"38070","prdValue":""},'
@@ -358,11 +480,6 @@ POPULATION_DATA = [
                   '{"targetId":"OV_L1_ID","targetValue":"38090","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"38100","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"38110","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"38111","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"38112","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"38113","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"38114","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"38115","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"38310","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"38320","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"38330","prdValue":""},'
@@ -373,20 +490,44 @@ POPULATION_DATA = [
                   '{"targetId":"OV_L1_ID","targetValue":"38380","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"38390","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"38400","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"39004","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"39005","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"39003","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"38410","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"38800","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"38810","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"38820","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"38830","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"38840","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"38850","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"38860","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"38870","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"38880","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"38890","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"38900","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"38960","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"38110_2010","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"38111","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"38112","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"38113","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"38114","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"38115","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3900A","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3900B","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3900C","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3900D","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"3900E","prdValue":""},'
                   '{"targetId":"OV_L1_ID","targetValue":"39010","prdValue":""},'
-                  '{"targetId":"OV_L1_ID","targetValue":"39020","prdValue":""}]'),
+                  '{"targetId":"OV_L1_ID","targetValue":"39020","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"39310","prdValue":""},'
+                  '{"targetId":"OV_L1_ID","targetValue":"39320","prdValue":""},'
+                  '{"targetId":"OV_L2_ID","targetValue":"00","prdValue":""}]'),
     ('colAxis', 'ITEM'),
     ('rowAxis', 'A,TIME'),
     ('isFirst', 'N'),
     ('contextPath', '/statHtml'),
     ('ordColIdx', ''),
     ('ordType', ''),
-    ('logSeq', '131672596'),
+    ('logSeq', '231540516'),
     ('vwCd', 'MT_ZTITLE'),
-    ('listId', 'A11_2015_1_10_10'),
+    ('listId', 'A111'),
     ('connPath', 'ZA'),
     ('statId', '1962001'),
     ('pub', '2'),
@@ -408,20 +549,20 @@ POPULATION_DATA = [
     ('noSelect', ''),
     ('view', 'csv'),
     ('analWithCHGRATE', ''),
-    ('defaulPeriodArr', f'{{"Y": [{currentyear}]}}'),
-    ('defaultClassArr', '[{"objVarId":"A","data":["00","04","05","03","11","21","22","23","24","25","26","29","31","32","33","34","35","36","37","38","39"],"classType":1,"classLvlCnt":21},{"objVarId":"A","data":["11010","11020","11030","11040","11050","11060","11070","11080","11090","11100","11110","11120","11130","11140","11150","11160","11170","11180","11190","11200","11210","11220","11230","11240","11250","21004","21005","21003","21010","21020","21030","21040","21050","21060","21070","21080","21090","21100","21110","21120","21130","21140","21150","21310","22004","22005","22003","22010","22020","22030","22040","22050","22060","22070","22310","23004","23005","23003","23010","23020","23030","23040","23050","23060","23070","23080","23090","23310","23320","24010","24020","24030","24040","24050","25010","25020","25030","25040","25050","26004","26005","26003","26010","26020","26030","26040","26310","29004","29005","29003","29010","31004","31005","31003","31010","31011","31012","31013","31014","31020","31021","31022","31023","31030","31040","31041","31042","31050","31051","31052","31053","31060","31070","31080","31090","31091","31092","31100","31101","31103","31104","31110","31120","31130","31140","31150","31160","31170","31180","31190","31191","31192","31193","31200","31210","31220","31230","31240","31250","31260","31270","31280","31350","31370","31380","32004","32005","32003","32010","32020","32030","32040","32050","32060","32070","32310","32320","32330","32340","32350","32360","32370","32380","32390","32400","32410","33004","33005","33003","33020","33030","33040","33041","33042","33043","33044","33320","33330","33340","33350","33360","33370","33380","33390","34004","34005","34003","34010","34011","34012","34020","34030","34040","34050","34060","34070","34080","34310","34330","34340","34350","34360","34370","34380","35004","35005","35003","35010","35011","35012","35020","35030","35040","35050","35060","35310","35320","35330","35340","35350","35360","35370","35380","36004","36005","36003","36010","36020","36030","36040","36060","36310","36320","36330","36350","36360","36370","36380","36390","36400","36410","36420","36430","36440","36450","36460","36470","36480","37004","37005","37003","37010","37011","37012","37020","37030","37040","37050","37060","37070","37080","37090","37100","37310","37320","37330","37340","37350","37360","37370","37380","37390","37400","37410","37420","37430","38004","38005","38003","38030","38050","38060","38070","38080","38090","38100","38110","38111","38112","38113","38114","38115","38310","38320","38330","38340","38350","38360","38370","38380","38390","38400","39004","39005","39003","39010","39020"],"classType":2,"classLvlCnt":307}]'),
+    ('defaulPeriodArr', f'{{"Y": [{currentyear_2010}]}}'),
+    ('defaultClassArr', '[{"objVarId":"A","data":["00","0A","0B","0C","0D","0E","11","21","22","23","24","25","26","31","32","33","34","35","36","37","38","39","61","62","63","64","65"],"classType":1,"classLvlCnt":27},{"objVarId":"D","data":["00","05","10","15","20","25","30","35","40","45","50","55","60","65","70","75","77","80","84","85","90","95","96","97","98","99","9A"],"classType":1,"classLvlCnt":27}]'),
     ('existStblCmmtKor', 'Y'),
     ('existStblCmmtEng', 'Y'),
-    ('classAllArr', '[{"objVarId":"A","ovlSn":"1"}]'),
-    ('classSet', '[{"objVarId":"A","ovlSn":"1","visible":"true"}]'),
+    ('classAllArr', '[{"objVarId":"A","ovlSn":"1"},{"objVarId":"D","ovlSn":"2"}]'),
+    ('classSet', '[{"objVarId":"A","ovlSn":"1","visible":"true"},{"objVarId":"D","ovlSn":"2","visible":"true"}]'),
     ('selectAllFlag', 'N'),
     ('selectTimeRangeCnt', ''),
-    ('periodStr', 'Y'),
-    ('funcPrdSe', 'Y'),
-    ('tblNm', '인구, 가구 및 주택 - 읍면동(2015,2020), 시군구(2016~2019)'),
-    ('tblEngNm', 'Population, Households and Housing Units'),
+    ('periodStr', 'F'),
+    ('funcPrdSe', 'F'),
+    ('tblNm', '총조사인구 총괄(읍면동/성/연령별)'),
+    ('tblEngNm', 'Summary of Census Population(by administrative district/sex/age)'),
     ('isChangedDataOpt', ''),
-    ('itemMultiply', '984'),
+    ('itemMultiply', '469'),
     ('dimCo', ''),
     ('dbUser', 'NSI.'),
     ('usePivot', 'N'),
@@ -441,7 +582,7 @@ POPULATION_DATA = [
     ('first_open', ''),
     ('debug', ''),
     ('maxCellOver', 'Y'),
-    ('reqCellCnt', '5904'),
+    ('reqCellCnt', '8442'),
     ('inheritYn', 'N'),
     ('originOrgId', ''),
     ('originTblId', ''),
@@ -457,7 +598,7 @@ POPULATION_DATA = [
     ('diviSearchYn', ''),
     ('orderStr', 'OV_L1_ID,TIME,CHAR_ITM_ID'),
     ('startNum', '1'),
-    ('endNum', '5001'),
+    ('endNum', '5000'),
     ('colClsAt', 'N'),
     ('analyzable', 'true'),
     ('expDash', 'Y'),
@@ -470,6 +611,7 @@ POPULATION_DATA = [
     ('prdSortPop', 'asc'),
     ('naviInfo', 'tabItemText'),
     ('naviInfo', 'A'),
+    ('naviInfo', 'D'),
     ('naviInfo', 'tabTimeText'),
     ('assayLeft', 'none'),
     ('assayselectType', 'none'),
@@ -484,8 +626,9 @@ POPULATION_DATA = [
     ('compValue02', ''),
 ]
 
-POPULATION_DOWN_URL = 'https://kosis.kr/statHtml/downNormal.do'
-POPULATION_DOWN_COOKIES = {
+POPULATION_DOWN_POST_URL = 'https://kosis.kr/statHtml/downNormal.do'
+
+POPULATION_DOWN_POST_COOKIES = {
     'mb': 'N',
     'PCID': '16506134382599916704637',
     'newKOSIS2020StatisCtgrSettingCookie_2': 'A%7CB%7CC%7CD%7CE%7CF%7CG%7CH1%7CH2%7CI1%7CI2%7CJ1%7CJ2%7CK1%7CK2%7CL%7CM1%7CM2%7CN1%7CN2%7CO%7CP1%7CP2%7CQ%7CR%7CS1%7CS2%7CT%7CU%7CV',
@@ -494,7 +637,7 @@ POPULATION_DOWN_COOKIES = {
     'clientid': '060075621396',
     'KOSISMyViewStatisCookie': '101%7CDT_1IN1502%7C%uC778%uAD6C%2C%20%uAC00%uAD6C%20%uBC0F%20%uC8FC%uD0DD%20-%20%uC74D%uBA74%uB3D9%282015%2C2020%29%2C%20%uC2DC%uAD70%uAD6C%282016%7E2019%29%u2502101%7CDT_1IN1509%7C%uC131%2C%20%uC5F0%uB839%20%uBC0F%20%uC138%uB300%uAD6C%uC131%uBCC4%20%uC778%uAD6C%20-%20%uC2DC%uAD70%uAD6C%u2502460%7CTX_315_2009_H1009%7C%uD589%uC815%uAD6C%uC5ED%20%uD604%uD669%u2502460%7CTX_315_2009_H1001%7C%uB3C4%uC2DC%uC9C0%uC5ED%20%uC778%uAD6C%uD604%uD669%28%uC2DC%uAD70%uAD6C%29%u2502101%7CDT_1IN1507%7C%uC131%2C%20%uC5F0%uB839%20%uBC0F%20%uAC00%uAD6C%uC8FC%uC640%uC758%20%uAD00%uACC4%uBCC4%20%uC778%uAD6C%20-%20%uC2DC%uAD70%uAD6C%u2502101%7CDT_1IN1503%7C%uC5F0%uB839%20%uBC0F%20%uC131%uBCC4%20%uC778%uAD6C%20-%20%uC74D%uBA74%uB3D9%282015%2C2020%29%2C%20%uC2DC%uAD70%uAD6C%282016%7E2019%29%u2502322%7CDT_32202_B044%7C%uC2DC%uAD70%uAD6C%uBCC4%20%uAE09%uC5EC%uC9C0%uAE09%20%uD604%uD669%u2502118%7CDT_118N_MON049%7C%uD589%uC815%uAD6C%uC5ED%28%uC2DC%uB3C4%29/%20%uC0B0%uC5C5/%uADDC%uBAA8%uBCC4%20%uC784%uAE08%20%uBC0F%20%uADFC%uB85C%uC2DC%uAC04%28%uC0C1%uC6A9%uADFC%uB85C%uC790%2C%uC0C1%uC6A9%uADFC%uB85C%uC790%205%uC778%uC774%uC0C1%20%uC0AC%uC5C5%uCCB4%29%u2502365%7CTX_36504_A000%7C%uD3C9%uADE0%20%uC784%uAE08%20%uD604%uD669%u2502',
 }
-POPULATION_DOWN_HEADER = {
+POPULATION_DOWN_POST_HEADER = {
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
     'Accept-Encoding': 'gzip, deflate, br',
     'Accept-Language': 'ko,en-US;q=0.9,en;q=0.8,ko-KR;q=0.7',
@@ -517,26 +660,25 @@ POPULATION_DOWN_HEADER = {
 }
 
 
-def make_population_down_data(csv):
-    POPULATION_DATA = []
+def make_population_post_down_data(csv):
+    POPULATION_POST_DATA = []
 
-    POPULATION_DATA_1 = [
+    POPULATION_POST_DATA_1 = [
         ('orgId', '101'),
-        ('tblId', 'DT_1IN1502'),
+        ('tblId', 'DT_1IN0001'),
         ('language', 'ko')]
-    POPULATION_DATA_2 = [('file', csv)]
-    currentTimeDate = datetime.now() - relativedelta(years=2)
-    currentyear = currentTimeDate.strftime('%Y')
-    POPULATION_DATA_3 = [('analText', ''),
+    POPULATION_POST_DATA_2 = [('file', csv)]
+
+    POPULATION_POST_DATA_3 = [('analText', ''),
                          ('scrId', ''),
-                         ('fieldList', f'[{{"targetId":"PRD","targetValue":"","prdValue":"Y,{index},@"}},'
-                                       '{"targetId":"ITM_ID","targetValue":"T100","prdValue":""},'
-                                       '{"targetId":"ITM_ID","targetValue":"T200","prdValue":""},'
-                                       '{"targetId":"ITM_ID","targetValue":"T312","prdValue":""},'
+                         ('fieldList', f'[{{"targetId":"PRD","targetValue":"","prdValue":"F,{index},@"}},'
+                                       '{"targetId":"ITM_ID","targetValue":"T10","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"00","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"04","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"05","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"03","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"0A","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"0B","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"0C","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"0D","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"0E","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"11","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"21","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"22","prdValue":""},'
@@ -544,7 +686,6 @@ def make_population_down_data(csv):
                                        '{"targetId":"OV_L1_ID","targetValue":"24","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"25","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"26","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"29","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"31","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"32","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"33","prdValue":""},'
@@ -554,6 +695,11 @@ def make_population_down_data(csv):
                                        '{"targetId":"OV_L1_ID","targetValue":"37","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"38","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"39","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"61","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"62","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"63","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"64","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"65","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"11010","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"11020","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"11030","prdValue":""},'
@@ -579,9 +725,9 @@ def make_population_down_data(csv):
                                        '{"targetId":"OV_L1_ID","targetValue":"11230","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"11240","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"11250","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"21004","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"21005","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"21003","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"2100C","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"2100D","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"2100E","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"21010","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"21020","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"21030","prdValue":""},'
@@ -597,10 +743,11 @@ def make_population_down_data(csv):
                                        '{"targetId":"OV_L1_ID","targetValue":"21130","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"21140","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"21150","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"21310","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"22004","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"22005","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"22003","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"21160","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"21800","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"2200C","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"2200D","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"2200E","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"22010","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"22020","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"22030","prdValue":""},'
@@ -608,10 +755,10 @@ def make_population_down_data(csv):
                                        '{"targetId":"OV_L1_ID","targetValue":"22050","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"22060","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"22070","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"22310","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"23004","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"23005","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"23003","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"22080","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"2300C","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"2300D","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"2300E","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"23010","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"23020","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"23030","prdValue":""},'
@@ -621,8 +768,8 @@ def make_population_down_data(csv):
                                        '{"targetId":"OV_L1_ID","targetValue":"23070","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"23080","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"23090","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"23310","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"23320","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"23100","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"23800","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"24010","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"24020","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"24030","prdValue":""},'
@@ -633,21 +780,18 @@ def make_population_down_data(csv):
                                        '{"targetId":"OV_L1_ID","targetValue":"25030","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"25040","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"25050","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"26004","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"26005","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"26003","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"2600C","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"2600D","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"2600E","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"26010","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"26020","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"26030","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"26040","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"26310","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"29004","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"29005","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"29003","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"29010","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"31004","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"31005","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"31003","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3100A","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3100C","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3100D","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3100E","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"31010","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"31011","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"31012","prdValue":""},'
@@ -665,6 +809,8 @@ def make_population_down_data(csv):
                                        '{"targetId":"OV_L1_ID","targetValue":"31051","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"31052","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"31053","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"31056","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"31057","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"31060","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"31070","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"31080","prdValue":""},'
@@ -673,6 +819,7 @@ def make_population_down_data(csv):
                                        '{"targetId":"OV_L1_ID","targetValue":"31092","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"31100","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"31101","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"31102","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"31103","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"31104","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"31110","prdValue":""},'
@@ -695,13 +842,39 @@ def make_population_down_data(csv):
                                        '{"targetId":"OV_L1_ID","targetValue":"31250","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"31260","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"31270","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"31280","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"31310","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"31320","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"31330","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"31340","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"31350","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"31360","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"31370","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"31380","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"32004","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"32005","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"32003","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"31390","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"31400","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"31410","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"31420","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"31430","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"31800","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"31810","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"31820","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"31830","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"31840","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"31850","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"31860","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"31870","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"31880","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"31890","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"31900","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"31910","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"31920","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"31930","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"31940","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"31950","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3200A","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3200C","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3200D","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3200E","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"32010","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"32020","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"32030","prdValue":""},'
@@ -720,16 +893,20 @@ def make_population_down_data(csv):
                                        '{"targetId":"OV_L1_ID","targetValue":"32390","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"32400","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"32410","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"33004","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"33005","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"33003","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"32800","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"32810","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"32820","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"32830","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3300A","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3300C","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3300D","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3300E","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"33010","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"33011","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"33012","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"33020","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"33030","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"33040","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"33041","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"33042","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"33043","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"33044","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"33310","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"33320","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"33330","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"33340","prdValue":""},'
@@ -738,9 +915,13 @@ def make_population_down_data(csv):
                                        '{"targetId":"OV_L1_ID","targetValue":"33370","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"33380","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"33390","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"34004","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"34005","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"34003","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"33800","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"33810","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"33820","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3400A","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3400C","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3400D","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3400E","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"34010","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"34011","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"34012","prdValue":""},'
@@ -750,20 +931,41 @@ def make_population_down_data(csv):
                                        '{"targetId":"OV_L1_ID","targetValue":"34050","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"34060","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"34070","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"34080","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"34310","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"34320","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"34330","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"34340","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"34350","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"34360","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"34370","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"34380","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"35004","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"35005","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"35003","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"34390","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"34400","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"34410","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"34800","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"34810","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"34820","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"34830","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"34840","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"34850","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"34860","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"34870","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"34880","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"34881","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"34882","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"34883","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"34884","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"34885","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"34886","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"34887","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3500A","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3500C","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3500D","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3500E","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"35010","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"35011","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"35012","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"35013","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"35020","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"35030","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"35040","prdValue":""},'
@@ -777,17 +979,27 @@ def make_population_down_data(csv):
                                        '{"targetId":"OV_L1_ID","targetValue":"35360","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"35370","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"35380","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"36004","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"36005","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"36003","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"35800","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"35810","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"35820","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"35830","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"35840","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"35850","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"35860","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3600A","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3600C","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3600D","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3600E","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"36010","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"36020","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"36030","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"36040","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"36050","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"36060","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"36310","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"36320","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"36330","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"36340","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"36350","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"36360","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"36370","prdValue":""},'
@@ -802,9 +1014,26 @@ def make_population_down_data(csv):
                                        '{"targetId":"OV_L1_ID","targetValue":"36460","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"36470","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"36480","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"37004","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"37005","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"37003","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"36800","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"36810","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"36820","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"36830","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"36840","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"36850","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"36860","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"36861","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"36862","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"36863","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"36864","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"36865","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"36866","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"36867","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"36868","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"36869","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3700A","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3700C","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3700D","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3700E","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"37010","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"37011","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"37012","prdValue":""},'
@@ -830,10 +1059,44 @@ def make_population_down_data(csv):
                                        '{"targetId":"OV_L1_ID","targetValue":"37410","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"37420","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"37430","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"38004","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"38005","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"38003","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"37800","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"37810","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"37820","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"37830","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"37840","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"37850","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"37860","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"37870","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"37880","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"37890","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"37900","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"37910","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"37911","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"37912","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"37913","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"37914","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"37915","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"37916","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"37918","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"37920","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3800A","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3800C","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3800D","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3800E","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"38010","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"38020","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"38021","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"38022","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"38023","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"38024","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"38025","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"38026","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"38027","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"38028","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"38030","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"38031","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"38032","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"38040","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"38050","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"38060","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"38070","prdValue":""},'
@@ -841,11 +1104,6 @@ def make_population_down_data(csv):
                                        '{"targetId":"OV_L1_ID","targetValue":"38090","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"38100","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"38110","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"38111","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"38112","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"38113","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"38114","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"38115","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"38310","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"38320","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"38330","prdValue":""},'
@@ -856,20 +1114,44 @@ def make_population_down_data(csv):
                                        '{"targetId":"OV_L1_ID","targetValue":"38380","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"38390","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"38400","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"39004","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"39005","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"39003","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"38410","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"38800","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"38810","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"38820","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"38830","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"38840","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"38850","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"38860","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"38870","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"38880","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"38890","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"38900","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"38960","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"38110_2010","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"38111","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"38112","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"38113","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"38114","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"38115","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3900A","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3900B","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3900C","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3900D","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"3900E","prdValue":""},'
                                        '{"targetId":"OV_L1_ID","targetValue":"39010","prdValue":""},'
-                                       '{"targetId":"OV_L1_ID","targetValue":"39020","prdValue":""}]'),
+                                       '{"targetId":"OV_L1_ID","targetValue":"39020","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"39310","prdValue":""},'
+                                       '{"targetId":"OV_L1_ID","targetValue":"39320","prdValue":""},'
+                                       '{"targetId":"OV_L2_ID","targetValue":"00","prdValue":""}]'),
                          ('colAxis', 'ITEM'),
                          ('rowAxis', 'A,TIME'),
                          ('isFirst', 'N'),
                          ('contextPath', '/statHtml'),
                          ('ordColIdx', ''),
                          ('ordType', ''),
-                         ('logSeq', '131672596'),
+                         ('logSeq', '131540516'),
                          ('vwCd', 'MT_ZTITLE'),
-                         ('listId', 'A11_2015_1_10_10'),
+                         ('listId', 'A111'),
                          ('connPath', 'ZA'),
                          ('statId', '1962001'),
                          ('pub', '2'),
@@ -890,22 +1172,21 @@ def make_population_down_data(csv):
                          ('dataOpt', 'ko'),
                          ('noSelect', ''),
                          ('view', 'csv'),
-                         ('mobChk', 'false'),
                          ('analWithCHGRATE', ''),
-                         ('defaulPeriodArr', f'{{"Y":[{currentyear}]}}'),
-                         ('defaultClassArr', '[{"objVarId":"A","data":["00","04","05","03","11","21","22","23","24","25","26","29","31","32","33","34","35","36","37","38","39"],"classType":1,"classLvlCnt":21},{"objVarId":"A","data":["11010","11020","11030","11040","11050","11060","11070","11080","11090","11100","11110","11120","11130","11140","11150","11160","11170","11180","11190","11200","11210","11220","11230","11240","11250","21004","21005","21003","21010","21020","21030","21040","21050","21060","21070","21080","21090","21100","21110","21120","21130","21140","21150","21310","22004","22005","22003","22010","22020","22030","22040","22050","22060","22070","22310","23004","23005","23003","23010","23020","23030","23040","23050","23060","23070","23080","23090","23310","23320","24010","24020","24030","24040","24050","25010","25020","25030","25040","25050","26004","26005","26003","26010","26020","26030","26040","26310","29004","29005","29003","29010","31004","31005","31003","31010","31011","31012","31013","31014","31020","31021","31022","31023","31030","31040","31041","31042","31050","31051","31052","31053","31060","31070","31080","31090","31091","31092","31100","31101","31103","31104","31110","31120","31130","31140","31150","31160","31170","31180","31190","31191","31192","31193","31200","31210","31220","31230","31240","31250","31260","31270","31280","31350","31370","31380","32004","32005","32003","32010","32020","32030","32040","32050","32060","32070","32310","32320","32330","32340","32350","32360","32370","32380","32390","32400","32410","33004","33005","33003","33020","33030","33040","33041","33042","33043","33044","33320","33330","33340","33350","33360","33370","33380","33390","34004","34005","34003","34010","34011","34012","34020","34030","34040","34050","34060","34070","34080","34310","34330","34340","34350","34360","34370","34380","35004","35005","35003","35010","35011","35012","35020","35030","35040","35050","35060","35310","35320","35330","35340","35350","35360","35370","35380","36004","36005","36003","36010","36020","36030","36040","36060","36310","36320","36330","36350","36360","36370","36380","36390","36400","36410","36420","36430","36440","36450","36460","36470","36480","37004","37005","37003","37010","37011","37012","37020","37030","37040","37050","37060","37070","37080","37090","37100","37310","37320","37330","37340","37350","37360","37370","37380","37390","37400","37410","37420","37430","38004","38005","38003","38030","38050","38060","38070","38080","38090","38100","38110","38111","38112","38113","38114","38115","38310","38320","38330","38340","38350","38360","38370","38380","38390","38400","39004","39005","39003","39010","39020"],"classType":2,"classLvlCnt":307}]'),
+                         ('defaulPeriodArr', f'{{"Y":[{currentyear_2010}]}}'),
+                         ('defaultClassArr', '[{"objVarId":"A","data":["00","0A","0B","0C","0D","0E","11","21","22","23","24","25","26","31","32","33","34","35","36","37","38","39","61","62","63","64","65"],"classType":1,"classLvlCnt":27},{"objVarId":"D","data":["00","05","10","15","20","25","30","35","40","45","50","55","60","65","70","75","77","80","84","85","90","95","96","97","98","99","9A"],"classType":1,"classLvlCnt":27}]'),
                          ('existStblCmmtKor', 'Y'),
                          ('existStblCmmtEng', 'Y'),
-                         ('classAllArr', '[{"objVarId":"A","ovlSn":"1"}]'),
-                         ('classSet', '[{"objVarId":"A","ovlSn":"1","visible":"true"}]'),
+                         ('classAllArr', '[{"objVarId":"A","ovlSn":"1"},{"objVarId":"D","ovlSn":"2"}]'),
+                         ('classSet', '[{"objVarId":"A","ovlSn":"1","visible":"true"},{"objVarId":"D","ovlSn":"2","visible":"true"}]'),
                          ('selectAllFlag', 'N'),
                          ('selectTimeRangeCnt', ''),
-                         ('periodStr', 'Y'),
-                         ('funcPrdSe', 'Y'),
-                         ('tblNm', '인구, 가구 및 주택 - 읍면동(2015,2020), 시군구(2016~2019)'),
-                         ('tblEngNm', 'Population, Households and Housing Units'),
+                         ('periodStr', 'F'),
+                         ('funcPrdSe', 'F'),
+                         ('tblNm', '총조사인구 총괄(읍면동/성/연령별)'),
+                         ('tblEngNm', 'Summary of Census Population(by administrative district/sex/age)'),
                          ('isChangedDataOpt', ''),
-                         ('itemMultiply', '984'),
+                         ('itemMultiply', '469'),
                          ('dimCo', ''),
                          ('dbUser', 'NSI.'),
                          ('usePivot', 'N'),
@@ -925,7 +1206,7 @@ def make_population_down_data(csv):
                          ('first_open', ''),
                          ('debug', ''),
                          ('maxCellOver', 'Y'),
-                         ('reqCellCnt', '5904'),
+                         ('reqCellCnt', '8442'),
                          ('inheritYn', 'N'),
                          ('originOrgId', ''),
                          ('originTblId', ''),
@@ -941,7 +1222,7 @@ def make_population_down_data(csv):
                          ('diviSearchYn', ''),
                          ('orderStr', 'OV_L1_ID,TIME,CHAR_ITM_ID'),
                          ('startNum', '1'),
-                         ('endNum', '5001'),
+                         ('endNum', '5000'),
                          ('colClsAt', 'N'),
                          ('analyzable', 'true'),
                          ('expDash', 'Y'),
@@ -954,6 +1235,7 @@ def make_population_down_data(csv):
                          ('prdSortPop', 'asc'),
                          ('naviInfo', 'tabItemText'),
                          ('naviInfo', 'A'),
+                         ('naviInfo', 'D'),
                          ('naviInfo', 'tabTimeText'),
                          ('assayLeft', 'none'),
                          ('assayselectType', 'none'),
@@ -967,7 +1249,7 @@ def make_population_down_data(csv):
                          ('compValue01', ''),
                          ('compValue02', ''),
                          ]
-    POPULATION_DATA.extend(POPULATION_DATA_1)
-    POPULATION_DATA.extend(POPULATION_DATA_2)
-    POPULATION_DATA.extend(POPULATION_DATA_3)
-    return POPULATION_DATA
+    POPULATION_POST_DATA.extend(POPULATION_POST_DATA_1)
+    POPULATION_POST_DATA.extend(POPULATION_POST_DATA_2)
+    POPULATION_POST_DATA.extend(POPULATION_POST_DATA_3)
+    return POPULATION_POST_DATA

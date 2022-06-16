@@ -35,17 +35,20 @@ class MyHome(object):
         :return:
         """
         job_list = {
-            "REG_REGION_CODE": "1 JOB - for actual tx & chartered rent",
-            "REGION_CODE_FULL": "2 JOB - Full registered Number ",
-            "POPULATION": "3 JOB",
+            # "REG_REGION_CODE": "1 JOB - for actual tx & chartered rent",
+            # "REGION_CODE_FULL": "2 JOB - Full registered Number ",
+            # "POPULATION": "3-1 JOB",
+            # "POPULATION_POST": "3-2 JOB",
+            # "POPULATION_FULL": "3-3 JOB",
+            # "POPULATION_FULL_POST": "3-4 JOB",
             "REGION_POP": "4 JOB - Region Code + Poppulation",
-            "GDP": "5 JOB",
-            "UNSOLD": "6 JOB",
-            "PRICE": "7 JOB"
+            # "GDP": "5 JOB",
+            # "UNSOLD": "6 JOB",
+            # "PRICE": "7 JOB"
         }
         for job, desc in job_list.items():
             self.logger.info(f"{job} : Start # {desc}")
-            self.extract.get_data_by_curl(get_type=f'{job}')
+            # self.extract.get_data_by_curl(get_type=f'{job}')
             self.transform.preprocessing(pre_type=f'{job}')
 
     def real_estate(self, selected_month, key):
@@ -110,15 +113,15 @@ class MyHome(object):
         """
 
         export_list = {
-            "AC_CH": "ac_ch.csv",
-            "GDP": "GDP_pre.csv",
+            # "AC_CH": "ac_ch.csv",
+            # "GDP": "GDP_pre.csv",
             "POPULATION": "population_pre.csv",
-            "PRICE": "PRICE_pre.csv",
-            "UNSOLD": "UNSOLD_pre.csv",
-            "ACTUAL_MASTER": "actual_tx_master.csv",
-            "CHARTERED_RENT_MASTER": "chartered_rent_master.csv",
-            "ACTUAL_DETAIL": "actual_tx_detail.csv",
-            "CHARTERED_RENT_DETAIL": "chartered_rent_detail.csv"
+            # "PRICE": "PRICE_pre.csv",
+            # "UNSOLD": "UNSOLD_pre.csv",
+            # "ACTUAL_MASTER": "actual_tx_master.csv",
+            # "CHARTERED_RENT_MASTER": "chartered_rent_master.csv",
+            # "ACTUAL_DETAIL": "actual_tx_detail.csv",
+            # "CHARTERED_RENT_DETAIL": "chartered_rent_detail.csv"
         }
 
         for key, value in export_list.items():
@@ -129,12 +132,13 @@ class MyHome(object):
 
     def export_mongodb(self):
         export_csv_list = {
-            "code": "code.csv",
-            "AC_CH": "ac_ch.csv",
-            "GDP": "GDP_pre.csv",
-            "POPULATION": "population_pre.csv",
-            "PRICE": "PRICE_pre.csv",
-            "UNSOLD": "UNSOLD_pre.csv",
+            # "code": "code.csv",
+            # "AC_CH": "ac_ch.csv",
+            # "GDP": "GDP_pre.csv",
+            # "POPULATION": "population_pre.csv",
+            # "PRICE": "PRICE_pre.csv",
+            # "UNSOLD": "UNSOLD_pre.csv",
+            "POPULATION_FULL": "population_full_pre_extend.csv",
         }
 
         export_final_list = {
@@ -147,6 +151,6 @@ class MyHome(object):
         for key, value in export_csv_list.items():
             self.export.call_remove_export_data_to_mongo(key, CSV_DIRECTORY + value)
 
-        for key, value in export_final_list.items():
-            self.export.call_remove_export_data_to_mongo(key, AC_CH_FINAL_DIRECTORY + value)
-            #self.export.call_export_data_to_mongo(key, AC_CH_FINAL_DIRECTORY + value)
+        # for key, value in export_final_list.items():
+        #     self.export.call_remove_export_data_to_mongo(key, AC_CH_FINAL_DIRECTORY + value)
+        #     #self.export.call_export_data_to_mongo(key, AC_CH_FINAL_DIRECTORY + value)
